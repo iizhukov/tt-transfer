@@ -29,7 +29,6 @@ ALLOWED_HOSTS = [
     "*"
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+
     'frontend',
+    'api.authentication',
+    'api.activityFeed',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +76,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tt_transfer.wsgi.application'
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
