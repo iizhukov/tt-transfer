@@ -1,0 +1,44 @@
+@import "../../scss/variabels";
+
+.upload-input {
+	height: 70px;
+	width: 100%;
+	background-color: #E8E8E8;
+	border: none;
+	outline: none;
+	padding: 25px 23px;
+	box-sizing: border-box;
+	font-weight: 400;
+	font-size: 16px;
+	margin-top: 20px;
+	display: block;
+}
+
+.MuiButton-contained {
+	background-color: #8DC73F;
+}
+
+.MuiButton-contained:hover {
+	background-color: #777777;
+}
+
+.documents {
+	margin-top: 40px;
+}
+
+
+.enter-button-1 {
+	margin-top: 70px;
+	background-color: $green;
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+	border-radius: 3px;
+	cursor: pointer;
+	color: #fff;
+	font-weight: 300;
+	font-size: 16px;
+	display: block;
+	width: 180px;
+	height: 45px;
+}

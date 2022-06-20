@@ -1,0 +1,102 @@
+@import "../.././scss/variabels";
+
+.wrap-of-register {
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	
+	
+	.registration-fields {
+		width: 500px;
+		@media (max-width: $md3 + px) {
+			max-width: 500px;
+			margin: 25px;
+		}
+		@media (max-width: $md4 + px) {
+			max-width: 400px;
+			margin: 0 25px;
+		}
+		@media (max-width: $md5 + px) {
+			margin: 20px;
+		}
+		
+		p {
+			margin-top: 15px;
+			@media (max-width: $md4 + px) {
+				text-align: center;
+				line-height: 25px;
+			}
+		}
+	}
+	
+	span.blue {
+		color: cornflowerblue;
+	}
+	
+	.register-title {
+		font-size: 32px;
+		font-weight: 400;
+		margin-bottom: 15px;
+		@media (max-width: $md3 + px) {
+		
+		}
+		@media (max-width: $md5 + px) {
+			font-size: 30px;
+		}
+	}
+	
+	.register-sub-tittle {
+		font-size: 16px;
+		font-weight: 300;
+		margin-bottom: 3px;
+		
+		
+		@media (max-width: $md4 + px) {
+			line-height: 1.5;
+			font-size: 18px;
+		}
+	}
+	
+	::placeholder {
+		color: #A0A9B4;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 18.75px;
+	}
+	
+	.register-buttons {
+		display: flex;
+		margin-top: 33px;
+		justify-content: space-between;
+		align-items: flex-end;
+		@media (max-width: $md4 + px) {
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			margin-top: 20px;
+		}
+	}
+	
+	.reset-password {
+		@media (max-width: $md4 + px) {
+			margin-top: 15px;
+		}
+	}
+	
+	
+	.save-auth {
+		
+		margin-top: 17px;
+		
+		label {
+			font-size: 16px;
+			font-weight: 300;
+			color: #787878;
+			margin-left: 13px;
+			margin-top: 2px;
+		}
+		
+	}
+	
+}

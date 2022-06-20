@@ -1,0 +1,20 @@
+@import '../.././scss/variabels';
+
+.wrap-of-register {
+	@media (max-width: $md4 + px) {
+		padding-top: 60px;
+	}
+	@media (max-width: $md5 + px) {
+		padding-top: 80px;
+	}
+	
+	.register-sub-tittle {
+		line-height: 25px;
+	}
+	
+	.blue {
+		cursor: pointer;
+		text-decoration: none;
+	}
+	
+}
