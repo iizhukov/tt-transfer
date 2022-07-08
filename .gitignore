@@ -29,6 +29,15 @@
 #tt_transfer django
 /tt_transfer/__pycache__
 
+# api __pycache__
+/api/__pycache__
+/api/activityFeed/__pycache__
+/api/authentication/__pycache__
+
+#api migrations
+/api/activityFeed/migrations
+/api/authentication/migrations
+
 #virtualenv
 /env
 
