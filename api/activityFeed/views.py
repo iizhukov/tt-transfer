@@ -11,7 +11,7 @@ from .serializers import NewsSerializer
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def get_news(request, number=None):
-    if request.method == "GET":
+    if request.method == "GET" :
         if number:
             news = News.objects.order_by("-creation_date")[:number]
         else:

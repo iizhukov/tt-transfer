@@ -1,17 +1,25 @@
+from email.policy import default
 from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
+from api.authentication.models import User
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 
 class News(models.Model):
-    title = models.CharField(verbose_name=_("Название"), max_length=256)
-    body = models.TextField(verbose_name=_("Содержимое"))
+    title = models.CharField(
+        _("Название"), max_length=256,
+    )
+    body = models.TextField(
+        _("Содержимое")
+    )
+    date = models.DateTimeField(
+        _("Дата создания"), default=timezone.now,
+    )
+    styles = models.JSONField(
+        _('Стили'), default=dict,
+    )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name=_("автор")
-    )
-    creation_date = models.DateTimeField(
-        verbose_name=_("Дата создания"), default=timezone.now()
     )
 
     class Meta:
