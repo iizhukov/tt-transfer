@@ -16,7 +16,7 @@ class News(models.Model):
         _("Дата создания"), default=timezone.now,
     )
     styles = models.JSONField(
-        _('Стили'), default=dict,
+        _('Стили'), default=dict, blank=True,
     )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name=_("автор")
