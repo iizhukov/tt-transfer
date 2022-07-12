@@ -17,3 +17,12 @@ class NewsListView(APIView):
         serializered_news = NewsSerializer(data=news, many=True)
         serializered_news.is_valid()
         return Response(serializered_news.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializered_new = NewsSerializer(data=request.data)
+
+        if serializered_new.is_valid():
+            serializered_new.save()
+            return Response(serializered_new, status=status.HTTP_201_CREATED)
+        
+        return Response(data={ "detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
