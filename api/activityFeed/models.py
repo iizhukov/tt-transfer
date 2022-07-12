@@ -1,8 +1,23 @@
 from email.policy import default
+from unicodedata import category
 from django.db import models
 from api.authentication.models import User
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+
+
+class Category(models.Model):
+    name = models.CharField(
+        _('Название'), max_length=64,
+    )
+
+    class Meta:
+        db_table = "news_category"
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+
+    def __str__(self) -> str:
+        return str(self.name)
 
 
 class News(models.Model):
@@ -20,6 +35,10 @@ class News(models.Model):
     )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name=_("автор")
+    )
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, verbose_name=_('Категория'),
+        blank=True, null=True,
     )
 
     class Meta:

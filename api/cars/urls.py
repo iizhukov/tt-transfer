@@ -4,5 +4,5 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.NewsView.as_view(), name='news_list'),
+    path('user-car/', views.UserCarView.as_view(), name="user_car"),
 ]

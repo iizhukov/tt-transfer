@@ -6,24 +6,30 @@ from django.utils import timezone
 from .manager import UserManager
 
 
+ROLES = (('a', 'admin'), ('m', 'manager'), ('d', 'driver'), ('c', 'client'))
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
-        _('почта'), unique=True, null=False, default=None,
+        _('почта'), unique=True, null=False,
     )
     name = models.CharField(
-        _('Имя'), max_length=64,
+        _('Имя'), max_length=64, blank=True, null=True,
     )
     surname = models.CharField(
-        _('Фамилия'), max_length=64,
+        _('Фамилия'), max_length=64, blank=True, null=True,
     )
     patronymic = models.CharField(
-        _('Отчество'), max_length=64,
+        _('Отчество'), max_length=64, blank=True, null=True,
     )
     phone = models.CharField(
-        _('Телефон'), max_length=14,
+        _('Телефон'), max_length=14, blank=True, null=True,
     )
     passport = models.CharField(
-        _('Паспорт'), max_length=10,
+        _('Паспорт'), max_length=10, blank=True, null=True,
+    )
+    role = models.CharField(
+        _('Роль'), max_length=1, choices=ROLES, default='c'
     )
     
     is_staff = models.BooleanField(_("Сотрудник"), default=False)
