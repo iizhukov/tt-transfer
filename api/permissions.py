@@ -17,3 +17,12 @@ class IsManagerUser(BasePermission):
 
     def has_permission(self, request, view) -> bool:
         return request.user.role == "m"
+
+
+class IsManagerOrAdminUser(BasePermission):
+    """
+    Allows access only to managers and admin.
+    """
+
+    def has_permission(self, request, view) -> bool:
+        return bool(request.user.role == "m" or request.user.role == "a")

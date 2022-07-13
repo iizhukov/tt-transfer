@@ -27,8 +27,17 @@ class GetUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email',
+            'phone', 'passport', 'email'
         )
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password1 = serializers.CharField()
+    new_password2 = serializers.CharField()
+
+    class Meta:
+        fields = "__all__"
 
 
 class UserLoginSerializer(serializers.ModelSerializer):

@@ -57,6 +57,9 @@ class News(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name=_("автор")
     )
+    is_important = models.BooleanField(
+        _("Важное сообщение"), default=False,
+    )
     # category = models.ForeignKey(
     #     Category, on_delete=models.CASCADE, verbose_name=_('Категория'),
     #     blank=True, null=True,
