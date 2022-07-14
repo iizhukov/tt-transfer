@@ -17,10 +17,10 @@ from .serializers import (
     CookieTokenRefreshSerializer, ChangePasswordSerializer,
 )
 
+
 class UserListView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AllowAny, )
 
 
 class CreateUserView(APIView):
@@ -55,10 +55,32 @@ class CreateUserView(APIView):
         return Response({ "detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserLogoutView(APIView):
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        response = Response(status=status.HTTP_200_OK)
+        response.data = { "detail": "Пользователь вышел из аккаунта" }
+
+        response.delete_cookie("refresh_token")
+
+        if request.COOKIES.get('refresh_token'):
+            print(True)
+            del request.COOKIES['refresh_token']
+
+        return response
+
+
+class GetUserDataView(APIView):
+    def get(self, request):
+        user = model_to_dict(request.user)
+        serializered_user = GetUserSerializer(data=user)
+        serializered_user.is_valid()
+        return Response(data=serializered_user.data, status=status.HTTP_200_OK)
+
+
 class ChangePasswordView(APIView):
     def post(self, request):
-        print(request.user)
-
         serialized_password = ChangePasswordSerializer(data=request.data)
         
         if serialized_password.is_valid():
@@ -75,34 +97,68 @@ class ChangePasswordView(APIView):
         return Response(data={ "detail": "Данные не валидны" }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class IsAuthView(APIView):
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return Response({ "status": True }, status=status.HTTP_200_OK)
+        return Response({ "status": False }, status=status.HTTP_401_UNAUTHORIZED)
+
+
 class CookieTokenObtainPairView(TokenObtainPairView):
   def finalize_response(self, request, response, *args, **kwargs):
     if response.data.get('refresh'):
-        cookie_max_age = 3600 * 24 * 15
-        response.set_cookie('refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+            value=response.data["refresh"],
+            expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+        )
+        # del response.data['refresh']
 
+    if response.data.get("access"):
         access = AccessToken(response.data["access"])
-        user = User.objects.get(id=access["user_id"])
+        user = User.objects.filter(id=access["user_id"]).first()
 
-        serialized_user = GetUserSerializer(data=model_to_dict(user))
-        serialized_user.is_valid()
+        if user:
+            serialized_user = GetUserSerializer(data=model_to_dict(user))
+            serialized_user.is_valid()
 
-        response.data["user"] = serialized_user.data
-        del response.data['refresh']
+            response.data["user"] = serialized_user.data
 
     return super().finalize_response(request, response, *args, **kwargs)
 
 
 class CookieTokenRefreshView(TokenRefreshView):
     serializer_class = CookieTokenRefreshSerializer
+    permission_classes = (AllowAny, )
 
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
-            cookie_max_age = 3600 * 24 * 15
-            response.set_cookie('refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True, samesite="Strict")
-    
-            del response.data['refresh']
-    
+            response.set_cookie(
+                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                value=response.data["refresh"],
+                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            )
+
+            # del response.data['refresh']
+
+        if response.data.get("access"):
+            access = AccessToken(response.data["access"])
+            user = User.objects.filter(id=access["user_id"]).first()
+
+            if user:
+                serialized_user = GetUserSerializer(data=model_to_dict(user))
+                serialized_user.is_valid()
+
+                response.data["user"] = serialized_user.data
+
         return super().finalize_response(request, response, *args, **kwargs)
 
 

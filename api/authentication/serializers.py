@@ -48,6 +48,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 class CookieTokenRefreshSerializer(TokenRefreshSerializer):
     refresh = None
+
     def validate(self, attrs):
         attrs['refresh'] = self.context['request'].COOKIES.get('refresh_token')
         if attrs['refresh']:
