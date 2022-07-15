@@ -5,10 +5,15 @@ from . import views
 
 
 urlpatterns = [
+    path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),
+    path('reset-password/get-code/', views.ResetPasswordGetCodeView.as_view(), name='reset_password__get_code'),
+    path('reset-password/check-code/', views.ResetPasswordCheckCodeView.as_view(), name='reset_password__check_code'),
+    path('reset-password/', views.ResetPasswordView.as_view(), name='reset_password'),
+
+    path('is-auth/', views.IsAuthView.as_view(), name="is_auth"),
     path('get-user-data/', views.GetUserDataView.as_view(), name="get_user_data"),
     path('user-list/', views.UserListView.as_view(), name="user_list"),
-    path('is-auth/', views.IsAuthView.as_view(), name="is_auth"),
-    path('change-password/', views.ChangePasswordView.as_view(), name='change_password'),
+
     path('create-user/', views.CreateUserView.as_view(), name='create_user'),
     path('logout/', views.UserLogoutView.as_view(), name="logout"),
 

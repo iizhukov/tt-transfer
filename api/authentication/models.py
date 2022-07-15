@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+from random import randint
 
 from .manager import UserManager
 
@@ -31,6 +32,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(
         _('Роль'), max_length=1, choices=ROLES, default='c'
     )
+    confirmed = models.BooleanField(
+        _('Подтвержден'), default=False,
+    )
     
     is_staff = models.BooleanField(_("Сотрудник"), default=False)
     is_active = models.BooleanField(
@@ -50,3 +54,32 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'user'
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    def __str__(self) -> str:
+        return f"{self.name} {self.surname}"
+
+    def save(self, *args, **kwargs):
+        if self.role in ("c", "d"):
+            self.confirmed = True
+        return super(User, self).save(*args, **kwargs)
+
+
+class ResetPasswordCode(models.Model):
+    code = models.IntegerField(
+        _('Код авторизации'), default=randint(111111, 999999),
+    )
+    user = models.ForeignKey(
+        User, models.CASCADE, verbose_name=_('Пользователь'),
+    )
+    end_datetime = models.DateTimeField(
+        _('Дата окончания действия'),
+        default=(timezone.now() + timezone.timedelta(minutes=5))
+    )
+
+    class Meta:
+        db_table = "reset_password_code"
+        verbose_name = "Код сброса пароля"
+        verbose_name_plural = "Коды сброса пролей"
+
+    def __str__(self) -> str:
+        return f"{self.user.email} : {self.code}"

@@ -3,7 +3,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import serializers
 from django.forms.models import model_to_dict
 
-from .models import User
+from .models import User, ResetPasswordCode
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email', 'password'
+            'phone', 'passport', 'email', 'password', 'confirmed'
         )
 
     def save(self, **kwargs):
@@ -27,7 +27,7 @@ class GetUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email'
+            'phone', 'passport', 'email', 'confirmed'
         )
 
 
@@ -55,3 +55,26 @@ class CookieTokenRefreshSerializer(TokenRefreshSerializer):
             return super().validate(attrs)
         else:
             raise InvalidToken('No valid token found in cookie \'refresh_token\'')
+
+
+class UserEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', )
+
+
+class CodeCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.IntegerField()
+
+    class Meta:
+        fields = ('code', 'email')
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.IntegerField()
+    password = serializers.CharField()
+
+    class Meta:
+        fields = ('email', 'code', 'password')

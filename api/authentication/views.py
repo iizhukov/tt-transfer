@@ -8,13 +8,16 @@ from rest_framework.generics import ListAPIView
 from django.forms.models import model_to_dict
 from django.contrib.auth import login, authenticate
 from django.middleware import csrf
+from django.utils import timezone
 from django.http import HttpResponseRedirect
 
 from tt_transfer import settings
-from .models import User
+from .models import User, ResetPasswordCode
+from .email import SendCode
 from .serializers import (
     UserSerializer, UserLoginSerializer, GetUserSerializer,
     CookieTokenRefreshSerializer, ChangePasswordSerializer,
+    UserEmailSerializer, CodeCodeSerializer, ResetPasswordSerializer
 )
 
 
@@ -69,6 +72,78 @@ class UserLogoutView(APIView):
             del request.COOKIES['refresh_token']
 
         return response
+
+
+class ResetPasswordGetCodeView(APIView):
+    serializer_class = UserEmailSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        if "email" in request.data:
+            email = request.data.get("email")
+            user = User.objects.filter(email=email).first()
+
+            if user:
+                code = ResetPasswordCode(user=user)
+                code.save()
+                print(code)
+
+                mail = SendCode((email, ))
+                mail.send_code(code.code)
+
+                return Response({ "detail": "Письмо отправлено с кодом отправлено" }, status=status.HTTP_200_OK)
+
+            return Response({ "detail": "Почта не идентифицирована" }, status=status.HTTP_400_BAD_REQUEST) 
+        return Response({ "detail": "Неверный запрос" }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordCheckCodeView(APIView):
+    serializer_class = CodeCodeSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        if "code" in request.data:
+            sent_code = request.data.get("code")
+            sent_email = request.data.get("email")
+            code = ResetPasswordCode.objects.filter(code=sent_code).first()
+
+            if not code or sent_email != code.user.email:
+                return Response({ "detail": "Не правильный код" }, status=status.HTTP_400_BAD_REQUEST)
+
+            if code.end_datetime < timezone.now():
+                return Response({ "detail": "Время жизни кода вышло" }, status=status.HTTP_403_FORBIDDEN)
+
+            print("Верный код")
+            return Response({ "detail": "Соответствующий код" }, status=status.HTTP_200_OK)
+        return Response({ "detail": "Неверный запрос" }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordView(APIView):
+    serializer_class = ResetPasswordSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            code = ResetPasswordCode.objects.filter(code=serializer.data.get("code")).first()
+            email = serializer.data.get("email")
+            user = User.objects.get(email=email)
+
+            if not code:
+                return Response({ "detail": "Не правильный код" }, status=status.HTTP_400_BAD_REQUEST)
+
+            if user.email != email and user != code.user:
+                return Response({ "detail": "Не правильный email" }, status=status.HTTP_400_BAD_REQUEST)
+                
+            new_password = serializer.data.get("password")
+            user.set_password(new_password)
+            user.save()
+
+            code.delete()
+
+            return Response({ "detail": "Пароль сменен" }, status=status.HTTP_200_OK)
+        return Response({ "detail": "Неверный запрос" }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetUserDataView(APIView):
@@ -137,7 +212,7 @@ class CookieTokenRefreshView(TokenRefreshView):
     permission_classes = (AllowAny, )
 
     def finalize_response(self, request, response, *args, **kwargs):
-        if response.data.get('refresh'):
+        if response.data.get("refresh"):
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                 value=response.data["refresh"],
@@ -146,8 +221,7 @@ class CookieTokenRefreshView(TokenRefreshView):
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
-
-            # del response.data['refresh']
+            # del response.data["refresh"]
 
         if response.data.get("access"):
             access = AccessToken(response.data["access"])
