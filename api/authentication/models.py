@@ -3,8 +3,23 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from random import randint
+import os
+from django.conf import settings
 
 from .manager import UserManager
+
+
+def upload_avatar_to(prefix):
+    def _path(instance, filename):
+        format = filename.split(".")[-1]
+        path = os.path.join(settings.MEDIA_ROOT, prefix, instance.email)
+
+        for file in os.listdir(path):
+            if "avatar" in file:
+                os.remove(os.path.join(path, file))
+
+        return os.path.join(path, f"avatar.{format}")
+    return _path
 
 
 ROLES = (('a', 'admin'), ('m', 'manager'), ('d', 'driver'), ('c', 'client'))
@@ -34,6 +49,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     confirmed = models.BooleanField(
         _('Подтвержден'), default=False,
+    )
+    avatar = models.ImageField(
+        _('Аватар'), upload_to=upload_avatar_to("users/"),
+        null=True, blank=True
     )
     
     is_staff = models.BooleanField(_("Сотрудник"), default=False)
@@ -66,14 +85,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class ResetPasswordCode(models.Model):
     code = models.IntegerField(
-        _('Код авторизации'), default=randint(111111, 999999),
+        _('Код авторизации'),
     )
     user = models.ForeignKey(
         User, models.CASCADE, verbose_name=_('Пользователь'),
     )
     end_datetime = models.DateTimeField(
         _('Дата окончания действия'),
-        default=(timezone.now() + timezone.timedelta(minutes=5))
     )
 
     class Meta:

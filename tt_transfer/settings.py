@@ -30,7 +30,7 @@ INSTALLED_APPS = [
 
     # rest framework
     'rest_framework',
-    # 'corsheaders',
+    'corsheaders',
 
     # api
     'api.authentication',
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -82,6 +82,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    # 'DEFAULT_PARSER_CLASSES': [
+    #     'rest_framework.parsers.JSONParser',
+    #     'rest_framework.parsers.MultiPartParser'
+    #     'rest_framework.parsers.FormParser',
+    # ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
@@ -133,18 +142,18 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': "Lax",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "https://",
-    "http://"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://",
+#     "http://"
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
-    "OPTIONS",
     "PATCH",
     "POST",
     "PUT",
@@ -160,11 +169,17 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'filename',
+    "Content-Disposition",
+    'name',
+    "boundary",
 ]
 
-CORS_ORIGIN_WHITELIST = (
-    "*"
-)
+# CORS_ORIGIN_ALLOW_ALL = False
+
+# CORS_ORIGIN_WHITELIST = (
+#     'https://127.0.0.1:3000',
+# )
 
 
 DATABASES = {
@@ -221,3 +236,10 @@ AUTH_USER_MODEL = 'authentication.User'
 ROOT_URLCONF = 'tt_transfer.urls'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+PROJECT_URL = "\\".join(BASE_DIR.split("\\")[:-1])
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, "temp\\")

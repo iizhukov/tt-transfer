@@ -32,9 +32,8 @@ class GetUserSerializer(serializers.ModelSerializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField()
-    new_password1 = serializers.CharField()
-    new_password2 = serializers.CharField()
+    oldPassword = serializers.CharField()
+    newPassword = serializers.CharField()
 
     class Meta:
         fields = "__all__"
@@ -44,6 +43,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')
+
+
+class UserEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('phone', 'surname', "name", "patronymic")
 
 
 class CookieTokenRefreshSerializer(TokenRefreshSerializer):
@@ -78,3 +83,9 @@ class ResetPasswordSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('email', 'code', 'password')
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('avatar', )
