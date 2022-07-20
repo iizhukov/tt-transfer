@@ -37,10 +37,16 @@
 /api/manager/__pycache__
 
 #api migrations
-/api/activityFeed/migrations
-/api/authentication/migrations
-/api/cars/migrations
-/api/manager/migrations
+api/activityFeed/migrations/*
+api/authentication/migrations/*
+api/cars/migrations/*
+api/manager/migrations/*
+
+#except
+!api/activityFeed/migrations/__init__.py
+!api/authentication/migrations/__init__.py
+!api/cars/migrations/__init__.py
+!api/manager/migrations/__init__.py
 
 #virtualenv
 /env

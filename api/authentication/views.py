@@ -1,17 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework.generics import ListAPIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.forms.models import model_to_dict
-from django.contrib.auth import login, authenticate
 from django.utils import timezone
 from django.conf import settings
-from PIL import Image
 from random import randint
 import os
 
@@ -55,7 +52,7 @@ class CreateUserView(APIView):
                 {"detail": "Пользователь с такой почтой уже существует"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         return Response({"detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -69,7 +66,6 @@ class UserLogoutView(APIView):
         response.delete_cookie("refresh_token")
 
         if request.COOKIES.get('refresh_token'):
-            print(True)
             del request.COOKIES['refresh_token']
 
         return response
@@ -96,7 +92,7 @@ class ResetPasswordGetCodeView(APIView):
 
                 return Response({"detail": "Письмо отправлено с кодом отправлено"}, status=status.HTTP_200_OK)
 
-            return Response({"detail": "Почта не идентифицирована"}, status=status.HTTP_400_BAD_REQUEST) 
+            return Response({"detail": "Почта не идентифицирована"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"detail": "Неверный запрос"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -117,7 +113,6 @@ class ResetPasswordCheckCodeView(APIView):
                 code.delete()
                 return Response({"detail": "Время действия кода истекло"}, status=status.HTTP_403_FORBIDDEN)
 
-            print("Верный код")
             return Response({"detail": "Соответствующий код"}, status=status.HTTP_200_OK)
         return Response({"detail": "Неверный запрос"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -130,7 +125,10 @@ class ResetPasswordView(APIView):
         serializer = ResetPasswordSerializer(data=request.data)
 
         if serializer.is_valid():
-            code = ResetPasswordCode.objects.filter(code=serializer.data.get("code")).first()
+            code = ResetPasswordCode.objects.filter(
+                code=serializer.data.get("code")
+            ).first()
+
             email = serializer.data.get("email")
             user = User.objects.get(email=email)
 
@@ -139,7 +137,7 @@ class ResetPasswordView(APIView):
 
             if user.email != email and user != code.user:
                 return Response({"detail": "Не правильный email"}, status=status.HTTP_400_BAD_REQUEST)
-                
+
             new_password = serializer.data.get("password")
             user.set_password(new_password)
             user.save()
@@ -160,9 +158,8 @@ class GetUserDataView(APIView):
 
 class ChangePasswordView(APIView):
     def post(self, request):
-        print("change password")
         serialized_password = ChangePasswordSerializer(data=request.data)
-        
+
         if serialized_password.is_valid():
             old_password = serialized_password.data.get("oldPassword")
             new_password = serialized_password.data.get("newPassword")
@@ -178,6 +175,7 @@ class ChangePasswordView(APIView):
 
 class EditUserView(APIView):
     serializer_class = UserEditSerializer
+    permission_classes = (AllowAny, )
 
     def post(self, request):
         sample = {
@@ -187,11 +185,9 @@ class EditUserView(APIView):
             "patronymic": "",
         }
         sample.update(request.data)
-        print(request.data)
         serializer = UserEditSerializer(data=sample)
 
         if serializer.is_valid():
-            print(serializer.data)
             user = request.user
 
             user.phone = serializer.data.get("phone") or user.phone
@@ -204,51 +200,30 @@ class EditUserView(APIView):
         return Response({"detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ImageUploadParser(FileUploadParser):
-    media_type = 'image/*'
-
-
 class UserAvatarView(APIView):
     serializer_class = AvatarSerializer
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = (AllowAny, )
 
     def post(self, request, format=None):
         user = request.user
+        user = User.objects.get(email="admin@adm.py")
+
         serializer = AvatarSerializer(instance=user, data=request.data)
-        # print(request.data)
 
         if serializer.is_valid():
             serializer.save()
-        
-            path = settings.PROJECT_URL
-            client_path = os.path.join(path, "client\\public\\uploads\\avatar\\")
             
-            image = serializer.validated_data.get("avatar")
-            format = image.__str__().split(".")[-1]
-
-            print(serializer.data)
-
-            with open(os.path.join(client_path, f"{user.email}.{format}"), "wb") as file:
-                image.file.seek(0)
-                file.write(image.file.read())
-
-            return Response({"file_name": f"{user.email}.{format}"}, status=status.HTTP_200_OK)
-        return Response({"file_name": None}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"avatar": user.avatar.url}, status=status.HTTP_200_OK)
+        return Response({"avatar": None}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        # user = request.user
+        user = request.user
         user = User.objects.get(email="admin@adm.py")
 
-        path = settings.PROJECT_URL
-        client_path = os.path.join(path, f"client\\public\\uploads\\avatar\\")
-        dir = os.listdir(client_path)
+        avatar = user.avatar.url if user.is_authenticated and user.avatar else None
 
-        for img in dir:
-            if user.email in img:
-                print(img)
-                return Response(data={"file_name": f"{img}"}, status=status.HTTP_200_OK)
-
-        return Response(data={"file_name": None}, status=status.HTTP_404_NOT_FOUND)
+        return Response(data={"avatar": avatar}, status=status.HTTP_404_NOT_FOUND)
 
 
 class IsAuthView(APIView):
@@ -261,29 +236,31 @@ class IsAuthView(APIView):
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
-  def finalize_response(self, request, response, *args, **kwargs):
-    if response.data.get('refresh'):
-        response.set_cookie(
-            key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-            value=response.data["refresh"],
-            expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-            httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-        )
-        # del response.data['refresh']
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get('refresh'):
+            response.set_cookie(
+                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                value=response.data["refresh"],
+                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            )
+            # del response.data['refresh']
 
-    if response.data.get("access"):
-        access = AccessToken(response.data["access"])
-        user = User.objects.filter(id=access["user_id"]).first()
+        if response.data.get("access"):
+            access = AccessToken(response.data["access"])
+            user = User.objects.filter(id=access["user_id"]).first()
 
-        if user:
-            serialized_user = GetUserSerializer(data=model_to_dict(user))
-            serialized_user.is_valid()
+            if user:
+                print(model_to_dict(user))
+                serialized_user = GetUserSerializer(data=model_to_dict(user))
+                serialized_user.initial_data["avatar"] = user.get_avatar_name()
+                serialized_user.is_valid()
 
-            response.data["user"] = serialized_user.data
+                response.data["user"] = serialized_user.data
 
-    return super().finalize_response(request, response, *args, **kwargs)
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class CookieTokenRefreshView(TokenRefreshView):
@@ -308,6 +285,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
             if user:
                 serialized_user = GetUserSerializer(data=model_to_dict(user))
+                serialized_user.initial_data["avatar"] = user.get_avatar_name()
                 serialized_user.is_valid()
 
                 response.data["user"] = serialized_user.data
@@ -330,14 +308,14 @@ class CookieTokenRefreshView(TokenRefreshView):
 #     def post(self, request):
 #         user_serializer = UserLoginSerializer(data=request.data)
 #         user_serializer.is_valid()
-        
+
 #         user = authenticate(
 #             email=user_serializer.data.get("email"),
 #             password=user_serializer.data.get("password")
 #         )
 
 #         response = Response(status=status.HTTP_200_OK)
-    
+
 #         if user is not None:
 #             if user.is_active:
 #                 data = get_tokens_for_user(user)

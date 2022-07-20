@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'api.middlewares.HaveRefreshTokenMiddleware',
+    'api.middlewares.HaveTokenToMediaMiddleware',
 ]
 
 ROOT_URLCONF = 'tt_transfer.urls'
@@ -242,4 +243,4 @@ PROJECT_URL = "\\".join(BASE_DIR.split("\\")[:-1])
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, "temp\\")
+# FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, "temp\\")

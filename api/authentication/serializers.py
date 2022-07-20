@@ -23,11 +23,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GetUserSerializer(serializers.ModelSerializer):
+    avatar = serializers.URLField()
+
     class Meta:
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email', 'confirmed'
+            'phone', 'passport', 'email', 'confirmed', 'avatar'
         )
 
 

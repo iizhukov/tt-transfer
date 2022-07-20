@@ -25,4 +25,4 @@ class IsManagerOrAdminUser(BasePermission):
     """
 
     def has_permission(self, request, view) -> bool:
-        return bool(request.user.role == "m" or request.user.role == "a")
+        return bool(request.user.is_authenticated and (request.user.role == "m" or request.user.role == "a"))
