@@ -55,3 +55,10 @@ api/manager/migrations/*
 #source files
 /source
 
+/media/avatars/*
+/media/documents/*
+/media/news/*
+
+!/media/avatars
+!/media/documents
+!/media/news

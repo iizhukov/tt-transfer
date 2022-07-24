@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from rest_framework import status
 
 
 class HaveRefreshTokenMiddleware:
@@ -11,8 +10,8 @@ class HaveRefreshTokenMiddleware:
 
         if request.path == "/api/auth/token/refresh/" and response.status_code == 401:
             return HttpResponse(
-                {"detail": "Refresh token invalid"},
-                status=status.HTTP_400_BAD_REQUEST
+                "Refresh token invalid",
+                status=400
             )
 
         return response
@@ -23,13 +22,20 @@ class HaveTokenToMediaMiddleware:
         self._get_response = get_response
 
     def __call__(self, request):
-        print(request.user, request.user.is_authenticated)
-        if "/media/news/" in request.path and request.user.is_authenticated:
-            return HttpResponse(
-                {"detail": "Not enough rights"},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
         response = self._get_response(request)
+
+        print(request.user, request.user.is_authenticated)
+        if "/media/documents/" in request.path:
+            if not request.user.is_authenticated or f"/media/documents/{request.user.email}" not in request.path:
+                return HttpResponse(
+                    "Not enough rights",
+                    status=401
+                )
+
+        if "/media/news/" in request.path and not request.user.is_authenticated:
+            return HttpResponse(
+                "Not enough rights",
+                status=401
+            )
 
         return response

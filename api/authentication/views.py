@@ -9,16 +9,16 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from django.conf import settings
+from validate_email import validate_email
 from random import randint
-import os
 
-from .models import User, ResetPasswordCode
+from .models import User, ResetPasswordCode, UserDocument
 from .email import SendCode
 from .serializers import (
     UserSerializer, GetUserSerializer,
     CookieTokenRefreshSerializer, ChangePasswordSerializer,
     UserEmailSerializer, CodeCodeSerializer, ResetPasswordSerializer,
-    UserEditSerializer, AvatarSerializer
+    UserEditSerializer, AvatarSerializer, DocumentSerializer
 )
 
 
@@ -40,11 +40,16 @@ class CreateUserView(APIView):
             "phone": "",
             "passport": "",
             "role": "c",
+            "confirmed": False,
+            "avatar": "/avatars/default_avatar.jpg"
         }
         user_sample.update(request.data)
         serializered_user = UserSerializer(data=user_sample)
 
         if serializered_user.is_valid():
+            if not CreateUserView._check_email(serializered_user.data.get("email")):
+                return Response({"detail": "Неккоректная почта"}, status=status.HTTP_409_CONFLICT)
+
             if serializered_user.save():
                 return Response(serializered_user.data, status=status.HTTP_200_OK)
 
@@ -54,6 +59,10 @@ class CreateUserView(APIView):
             )
 
         return Response({"detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def _check_email(email):
+        return validate_email(email, verify=True)
 
 
 class UserLogoutView(APIView):
@@ -87,8 +96,8 @@ class ResetPasswordGetCodeView(APIView):
                 code.save()
                 print(code)
 
-                # mail = SendCode((email, ))
-                # mail.send_code(code.code)
+                mail = SendCode((email, ))
+                mail.send_code(code.code)
 
                 return Response({"detail": "Письмо отправлено с кодом отправлено"}, status=status.HTTP_200_OK)
 
@@ -203,27 +212,56 @@ class EditUserView(APIView):
 class UserAvatarView(APIView):
     serializer_class = AvatarSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = (AllowAny, )
+    # permission_classes = (AllowAny, )
 
     def post(self, request, format=None):
         user = request.user
-        user = User.objects.get(email="admin@adm.py")
+        # user = User.objects.get(email="admin@adm.py")
 
         serializer = AvatarSerializer(instance=user, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
-            
-            return Response({"avatar": user.avatar.url}, status=status.HTTP_200_OK)
-        return Response({"avatar": None}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(email=request.user.email)
+            avatar = user.avatar.url
+            print(avatar)
+
+            return Response({"avatar": avatar}, status=status.HTTP_200_OK)
+        return Response({"avatar": user.avatar.url}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         user = request.user
-        user = User.objects.get(email="admin@adm.py")
+        # user = User.objects.get(email="admin@adm.py")
 
         avatar = user.avatar.url if user.is_authenticated and user.avatar else None
 
         return Response(data={"avatar": avatar}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserDocumentsView(APIView):
+    serializer_class = DocumentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    # permission_classes = (AllowAny, )
+
+    def get(self, request):
+        docs = UserDocument.objects.filter(user=request.user)
+        # docs = UserDocument.objects.filter(user=User.objects.get(email="zxc@zxc.zxc"))
+        return Response({"documents": [doc.document.url for doc in docs] }, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        for file in request.data:
+            doc = UserDocument(user=request.user)
+            serializer = DocumentSerializer(instance=doc, data={"document": request.data.get(file)})
+
+            if serializer.is_valid():
+                serializer.save()
+
+        documents = []
+
+        for doc in UserDocument.objects.filter(user=request.user):
+            documents.append(doc.document.url)
+            
+        return Response({"documents": documents}, status=status.HTTP_200_OK)
 
 
 class IsAuthView(APIView):
@@ -253,9 +291,9 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             user = User.objects.filter(id=access["user_id"]).first()
 
             if user:
-                print(model_to_dict(user))
                 serialized_user = GetUserSerializer(data=model_to_dict(user))
-                serialized_user.initial_data["avatar"] = user.get_avatar_name()
+                serialized_user.initial_data["avatar"] = user.avatar.url
+
                 serialized_user.is_valid()
 
                 response.data["user"] = serialized_user.data
@@ -285,7 +323,8 @@ class CookieTokenRefreshView(TokenRefreshView):
 
             if user:
                 serialized_user = GetUserSerializer(data=model_to_dict(user))
-                serialized_user.initial_data["avatar"] = user.get_avatar_name()
+                serialized_user.initial_data["avatar"] = user.avatar.url
+                print(user.avatar.url)
                 serialized_user.is_valid()
 
                 response.data["user"] = serialized_user.data

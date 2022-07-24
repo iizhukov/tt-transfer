@@ -3,7 +3,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import serializers
 from django.forms.models import model_to_dict
 
-from .models import User, ResetPasswordCode
+from .models import User, ResetPasswordCode, UserDocument
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -91,3 +91,9 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar', )
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserDocument
+        fields = ('document', )

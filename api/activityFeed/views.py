@@ -1,9 +1,11 @@
+from email.errors import NoBoundaryInMultipartDefect
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes as perm
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.forms import model_to_dict
 from django.conf import settings
 import os
 
@@ -15,28 +17,39 @@ from .serializers import (
 )
 
 
-class NewsView(APIView):
-    # permission_classes = (AllowAny, )
-    
-    def get(self, request):
-        # user = request.user
-        user = User.objects.get(email="admin@adm.py")
+class NewsView(APIView):    
+    def get(self, request, limit=None):
+        user = request.user
+        # user = User.objects.get(email="admin@adm.py")
 
         news = News.objects.filter(
             category__in=set((
                 get_category_by_role(user.role),
-                "all"
+                "for_all"
             ))
-        ).order_by("-date")
+        ).order_by("-date")[:limit]
 
         serializered_news = NewsSerializer(data=news, many=True)
         serializered_news.is_valid()
 
-        return Response(serializered_news.data, status=status.HTTP_200_OK)
+        data = []
+        for news_ in serializered_news.data:
+            news_ = dict(news_)
+            images = NewsImageView._get_image_by_news(news_["id"])
+            files = NewsFileView._get_files_by_news(news_["id"])
+
+            news_data = {
+                **news_,
+                "images": images,
+                "files": files
+            }
+            data.append(news_data)
+
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        # user = request.user
-        user = User.objects.get(email="admin@adm.py")
+        user = request.user
+        # user = User.objects.get(email="admin@adm.py")
 
         if user.role not in ("a", "m"):
             return Response({ "detail": "Недостаточно прав" }, status=status.HTTP_400_BAD_REQUEST)
@@ -53,7 +66,6 @@ class NewsView(APIView):
 class NewsImageView(APIView):
     serializer_class = NewsImageSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = (AllowAny, )
 
     def get(self, request):
         if "id" not in request.data:
@@ -65,32 +77,42 @@ class NewsImageView(APIView):
         if not news:
             return Response({"detail": "Нет такой новости"}, status=status.HTTP_400_BAD_REQUEST)
 
-        path = settings.PROJECT_URL
-        client_path = os.path.join(path, f"client\\public\\uploads\\news\\images\\{news.id}")
-
-        dir = []
-
-        if os.path.exists(client_path):
-            dir = os.listdir(client_path)
-
-            print(dir)
-
-        return Response({"images": dir}, status=status.HTTP_200_OK)
+        return Response(
+            {"images": NewsImageView._get_image_by_news(news=news)},
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request):
-        serializer = NewsImageSerializer(data=request.data)
+        news = News.objects.get(id=request.data.get("news"))
 
-        if serializer.is_valid():
-            serializer.save()
+        for image in request.data:
+            news_image = ImageModel(news=news)
+            serializer = NewsImageSerializer(
+                instance=news_image,
+                data={"image": request.data.get(image)}
+            )
 
-            return Response({}, status=status.HTTP_200_OK)
-        return Response({"detail": "Не ваалид :("}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                serializer.save()
+
+        return Response(
+            {"images": NewsImageView._get_image_by_news(news)},
+            status=status.HTTP_200_OK
+        )
+
+    @staticmethod
+    def _get_image_by_news(news):
+        images = []
+
+        for image in ImageModel.objects.filter(news=news):
+            images.append(image.image.url)
+
+        return images
 
 
 class NewsFileView(APIView):
     serializer_class = NewsFileSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = (IsManagerOrAdminUser, )
 
     def get(self, request):
         if "id" not in request.data:
@@ -102,26 +124,37 @@ class NewsFileView(APIView):
         if not news:
             return Response({"detail": "Нет такой новости"}, status=status.HTTP_400_BAD_REQUEST)
 
-        path = settings.PROJECT_URL
-        client_path = os.path.join(path, f"client\\public\\uploads\\news\\files\\{news.id}")
-
-        dir = []
-
-        if os.path.exists(client_path):
-            dir = os.listdir(client_path)
-
-            print(dir)
-
-        return Response({"files": dir}, status=status.HTTP_200_OK)
+        return Response(
+            {"files": NewsFileView._get_files_by_news(news=news)},
+            status=status.HTTP_200_OK
+        )
 
     def post(self, request):
-        serializer = NewsFileSerializer(data=request.data)
+        news = News.objects.get(id=request.data.get("news"))
 
-        if serializer.is_valid():
-            serializer.save()
+        for file in request.data:
+            news_file = FileModel(news=news)
+            serializer = NewsImageSerializer(
+                instance=news_file,
+                data={"file": request.data.get(file)}
+            )
 
-            return Response({}, status=status.HTTP_200_OK)
-        return Response({"detail": "Не ваалид :("}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                serializer.save()
+
+        return Response(
+            {"files": NewsFileView._get_files_by_news(news=news)},
+            status=status.HTTP_200_OK
+        )
+
+    @staticmethod
+    def _get_files_by_news(news):
+        files = []
+
+        for file in FileModel.objects.filter(news=news):
+            files.append(file.file.url)
+
+        return files
 
 
 def get_category_by_role(role) -> str:
@@ -134,4 +167,4 @@ def get_category_by_role(role) -> str:
     if role == "m":
         return "for_managers"
     
-    return "all"
+    return "for_all"

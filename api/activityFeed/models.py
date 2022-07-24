@@ -63,7 +63,6 @@ class ImageModel(models.Model):
         return f"{self.news.title}: {self.pk}"
 
     def save(self, *args, **kwargs):
-        self.save_image_to_client()
         return super().save(*args, **kwargs)
 
     def save_image_to_client(self):
@@ -99,7 +98,6 @@ class FileModel(models.Model):
         return f"{self.news.title}: {self.pk}"
 
     def save(self, *args, **kwargs):
-        self.save_file_to_client()
         return super().save(*args, **kwargs)
 
     def save_file_to_client(self):
@@ -117,7 +115,7 @@ class FileModel(models.Model):
 
 
 CATEGORIES = (
-    ("all", "Для всех"), ("for_managers", "Для менеджеров"),
+    ("for_all", "Для всех"), ("for_managers", "Для менеджеров"),
     ("for_drivers", "Для водителей"), ("for_clients", "Для клиентов")
 )
 
@@ -143,7 +141,7 @@ class News(models.Model):
     )
     category = models.CharField(
         _('Категория'), choices=CATEGORIES,
-        max_length=16, default=_("all"),
+        max_length=16, default=_("for_all"),
     )
 
     class Meta:

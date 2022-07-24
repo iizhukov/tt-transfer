@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -27,9 +28,15 @@ from .manager import UserManager
 #         return os.path.join(path, f"avatar.{format}")
 
 
+def _document_path(instance, filename):
+    path = os.path.join(settings.MEDIA_ROOT, "documents/", instance.user.email)
+
+    return os.path.join(path, filename)
+
+
 def _path(instance, filename):
     format = filename.split(".")[-1]
-    path = os.path.join(settings.MEDIA_ROOT, "users/", instance.email)
+    path = os.path.join(settings.MEDIA_ROOT, "avatars/", instance.email)
 
     if os.path.exists(path):
         for file in os.listdir(path):
@@ -69,7 +76,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     avatar = models.ImageField(
         _('Аватар'), upload_to=_path,
-        null=True, blank=True
+        default="/avatars/default_avatar.jpg"
     )
     is_online = models.BooleanField(
         _('Онлайн'), default=False
@@ -121,3 +128,21 @@ class ResetPasswordCode(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.email} : {self.code}"
+
+
+class UserDocument(models.Model):
+    user = models.ForeignKey(
+        User, models.CASCADE,
+        verbose_name=_('Пользователь')
+    )
+    document = models.FileField(
+        _('Документ'), upload_to=_document_path
+    )
+
+    class Meta:
+        db_table = "user_document"
+        verbose_name = "Документ"
+        verbose_name_plural = "Документы"
+
+    def __str__(self) -> str:
+        return f"{self.user} : {self.document}"
