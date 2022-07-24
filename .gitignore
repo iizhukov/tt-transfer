@@ -59,6 +59,7 @@ api/manager/migrations/*
 /media/documents/*
 /media/news/*
 
-!/media/avatars
-!/media/documents
-!/media/news
+!/media/avatars/
+!/media/documents/
+!/media/news/files/
+!/media/news/images/
