@@ -42,10 +42,6 @@ class Car(models.Model):
     car_class = models.CharField(
         _("Класс"), max_length=64,
     )
-    owner = models.ForeignKey(
-        User, models.CASCADE, verbose_name=_('Владелец'),
-        null=True, blank=True,
-    )
 
     class Meta:
         db_table = "car"
@@ -53,4 +49,4 @@ class Car(models.Model):
         verbose_name_plural = "Автомобили"
     
     def __str__(self) -> str:
-        return f"{self.brand} : {self.model}"
+        return f"{self.brand} {self.model}"

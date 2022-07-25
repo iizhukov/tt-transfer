@@ -34,19 +34,19 @@
 /api/activityFeed/__pycache__
 /api/authentication/__pycache__
 /api/cars/__pycache__
-/api/manager/__pycache__
+/api/drivers/__pycache__
 
 #api migrations
 api/activityFeed/migrations/*
 api/authentication/migrations/*
 api/cars/migrations/*
-api/manager/migrations/*
+api/drivers/migrations/*
 
 #except
 !api/activityFeed/migrations/__init__.py
 !api/authentication/migrations/__init__.py
 !api/cars/migrations/__init__.py
-!api/manager/migrations/__init__.py
+!api/drivers/migrations/__init__.py
 
 #virtualenv
 /env

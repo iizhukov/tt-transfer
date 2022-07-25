@@ -11,6 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'b__-c_-v^u8cmg!&$70m-#!2xr!-cbfuhw7)(oo**kunz0!$^p'
+GOOGLE_API_KEY = 'AIzaSyB7f_-PYvVJfO3631stf8u71P0PFMujMrs'
 # SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -34,8 +35,10 @@ INSTALLED_APPS = [
 
     # api
     'api.authentication',
+    'api.profiles',
     'api.activityFeed',
     'api.cars',
+    'api.drivers',
 ]
 
 MIDDLEWARE = [

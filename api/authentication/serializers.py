@@ -3,7 +3,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework import serializers
 from django.forms.models import model_to_dict
 
-from .models import User, ResetPasswordCode, UserDocument
+from .models import User, ResetPasswordCode
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,24 +33,10 @@ class GetUserSerializer(serializers.ModelSerializer):
         )
 
 
-class ChangePasswordSerializer(serializers.Serializer):
-    oldPassword = serializers.CharField()
-    newPassword = serializers.CharField()
-
-    class Meta:
-        fields = "__all__"
-
-
 class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')
-
-
-class UserEditSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('phone', 'surname', "name", "patronymic")
 
 
 class CookieTokenRefreshSerializer(TokenRefreshSerializer):
@@ -85,15 +71,3 @@ class ResetPasswordSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('email', 'code', 'password')
-
-
-class AvatarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('avatar', )
-
-
-class DocumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserDocument
-        fields = ('document', )
