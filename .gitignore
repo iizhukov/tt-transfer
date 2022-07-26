@@ -47,6 +47,7 @@ api/cars/migrations/*
 api/drivers/migrations/*
 api/orders/migrations/*
 api/profile/migrations/*
+api/tariffs/migrations/*
 
 #except
 !api/activityFeed/migrations/__init__.py
@@ -56,6 +57,7 @@ api/profile/migrations/*
 !api/drivers/migrations/__init__.py
 !api/orders/migrations/__init__.py
 !api/profile/migrations/__init__.py
+!api/tariffs/migrations/__init__.py
 
 #virtualenv
 /env

@@ -35,12 +35,13 @@ INSTALLED_APPS = [
 
     # api
     'api.authentication',
-    'api.profile',
+    'api.address',
     'api.activityFeed',
     'api.cars',
     'api.drivers',
-    'api.address',
     'api.orders',
+    'api.profile',
+    'api.tariffs',
 ]
 
 MIDDLEWARE = [

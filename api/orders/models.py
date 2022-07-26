@@ -22,19 +22,20 @@ class Order(models.Model):
     )
     contractor = models.ForeignKey(
         Contractor, models.CASCADE, verbose_name=_('Заказчик'),
+        null=True
     )
     car_class = models.CharField(
         _('Класс автомобиля'), choices=CAR_CLASSES, max_length=12,
     )
 
     client_name = models.CharField(
-        _('Имя клиента'), max_length=64,
+        _('Имя клиента'), max_length=64, blank=True, null=True,
     )
     client_surname = models.CharField(
-        _('Фамилия клиента'), max_length=64,
+        _('Фамилия клиента'), max_length=64, blank=True, null=True,
     )
     client_patronymic = models.CharField(
-        _('Отчество клиента'), max_length=64,
+        _('Отчество клиента'), max_length=64, blank=True, null=True,
     )
     clinet_phone = models.CharField(
         _('Телефон клиента'), max_length=14, blank=True, null=True,
