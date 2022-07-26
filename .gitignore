@@ -38,6 +38,7 @@
 /api/drivers/__pycache__
 /api/orders/__pycache__
 /api/profile/__pycache__
+/api/tariffs/__pycache__
 
 #api migrations
 api/activityFeed/migrations/*
