@@ -35,10 +35,12 @@ INSTALLED_APPS = [
 
     # api
     'api.authentication',
-    'api.profiles',
+    'api.profile',
     'api.activityFeed',
     'api.cars',
     'api.drivers',
+    'api.address',
+    'api.user_requests',
 ]
 
 MIDDLEWARE = [
@@ -90,11 +92,6 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
-    # 'DEFAULT_PARSER_CLASSES': [
-    #     'rest_framework.parsers.JSONParser',
-    #     'rest_framework.parsers.MultiPartParser'
-    #     'rest_framework.parsers.FormParser',
-    # ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
