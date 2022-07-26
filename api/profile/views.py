@@ -158,7 +158,7 @@ class ContractorView(APIView):
         if not serializer.is_valid():
             return Response(
                 {
-                    "detail": "Не валидные данные",
+                    "detail": "Невалидные данные",
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
