@@ -3,9 +3,10 @@ from django.utils.translation import gettext_lazy as _
 
 from api.address.models import Address
 from api.profile.models import Client
+from api.cars.models import CAR_CLASSES
 
 
-class UserRequest(models.Model):
+class Order(models.Model):
     from_address = models.ForeignKey(
         Address, models.CASCADE, verbose_name=_('Из'),
         related_name="from+",
@@ -16,4 +17,7 @@ class UserRequest(models.Model):
     )
     client = models.ForeignKey(
         Client, models.CASCADE, verbose_name=_('Клиент')
+    )
+    car_class = models.CharField(
+        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=12,
     )

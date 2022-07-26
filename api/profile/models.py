@@ -42,7 +42,7 @@ class Contractor(models.Model):
     location = models.ForeignKey(
         Address, models.CASCADE, verbose_name=_('Адрес')
     )
-    responsible = models.ForeignKey(
+    responsible = models.OneToOneField(
         User, models.CASCADE, verbose_name=_('Ответственный')
     )
     financial_turnover = models.IntegerField(
@@ -54,13 +54,16 @@ class Contractor(models.Model):
     )
 
     gen_director_name = models.CharField(
-        _('Имя'), max_length=64, blank=True, null=True,
+        _('Имя Ген директора'), max_length=64,
+        blank=True, null=True,
     )
     gen_director_surname = models.CharField(
-        _('Фамилия'), max_length=64, blank=True, null=True,
+        _('Фамилия Ген директора'), max_length=64,
+        blank=True, null=True,
     )
     gen_director_patronymic = models.CharField(
-        _('Отчество'), max_length=64, blank=True, null=True,
+        _('Отчество Ген директора'), max_length=64,
+        blank=True, null=True,
     )
 
     class Meta:

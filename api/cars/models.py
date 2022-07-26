@@ -18,6 +18,12 @@ from api.authentication.models import User
 #         return str(self.name)
 
 
+CAR_CLASSES = (
+    ('business', 'Бизнес'),
+    ('standart', 'Стандарт'),
+)
+
+
 class Car(models.Model):
     brand = models.CharField(
         _("Марка"), max_length=64,
@@ -40,7 +46,7 @@ class Car(models.Model):
         _('ПТС'), max_length=15,
     )
     car_class = models.CharField(
-        _("Класс"), max_length=64,
+        _("Класс"), choices=CAR_CLASSES, max_length=12,
     )
 
     class Meta:

@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'api.cars',
     'api.drivers',
     'api.address',
-    'api.user_requests',
+    'api.orders',
 ]
 
 MIDDLEWARE = [

@@ -32,21 +32,30 @@
 # api __pycache__
 /api/__pycache__
 /api/activityFeed/__pycache__
+/api/address/__pycache__
 /api/authentication/__pycache__
 /api/cars/__pycache__
 /api/drivers/__pycache__
+/api/orders/__pycache__
+/api/profile/__pycache__
 
 #api migrations
 api/activityFeed/migrations/*
+api/address/migrations/*
 api/authentication/migrations/*
 api/cars/migrations/*
 api/drivers/migrations/*
+api/orders/migrations/*
+api/profile/migrations/*
 
 #except
 !api/activityFeed/migrations/__init__.py
+!api/address/migrations/__init__.py
 !api/authentication/migrations/__init__.py
 !api/cars/migrations/__init__.py
 !api/drivers/migrations/__init__.py
+!api/orders/migrations/__init__.py
+!api/profile/migrations/__init__.py
 
 #virtualenv
 /env

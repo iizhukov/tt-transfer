@@ -24,9 +24,11 @@ class Address(models.Model):
 
     class Meta:
         db_table = "address"
+        verbose_name = "Адрес"
+        verbose_name_plural = "Адреса"
     
     def __str__(self) -> str:
-        return f"{self.country}"
+        return self.model_as_raw()
 
     def model_as_raw(self, region=True):
         return f"{self.country}, {self.region}, {self.city}, {self.street}, {self.number }"

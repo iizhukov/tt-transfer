@@ -12,7 +12,8 @@ from api.authentication.serializers import (
 )
 from .serializers import (
     ChangePasswordSerializer, UserEditSerializer,
-    AvatarSerializer, DocumentSerializer
+    AvatarSerializer, DocumentSerializer,
+    ContractorSerializer
 )
 
 
@@ -126,3 +127,45 @@ class GetUserDataView(APIView):
 class UserListView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class ContractorView(APIView):
+    serializer_class = ContractorSerializer
+    # permission_classes = (AllowAny, )
+
+    def get(self, request):
+        user = request.user
+    
+        if not getattr(user, "contractor", False):
+            return Response(
+                {},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        serializer = self.serializer_class(
+            data=model_to_dict(user.contractor)
+        )
+        serializer.is_valid()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "detail": "Не валидные данные",
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
