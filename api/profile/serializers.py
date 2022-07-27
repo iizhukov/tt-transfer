@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.forms.models import model_to_dict
 
 from api.authentication.models import User, UserDocument
-from api.profile.models import Contractor
+from api.profile.models import Company
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -33,7 +33,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         fields = ('document', )
 
 
-class ContractorSerializer(serializers.ModelSerializer):
+class CompanySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Contractor
+        model = Company
         fields = "__all__"

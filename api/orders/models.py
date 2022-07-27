@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from api.address.models import Address
-from api.profile.models import Contractor
+from api.profile.models import Company
 from api.cars.models import CAR_CLASSES
 
 
@@ -21,7 +21,7 @@ class Order(models.Model):
         related_name="to"
     )
     contractor = models.ForeignKey(
-        Contractor, models.CASCADE, verbose_name=_('Заказчик'),
+        Company, models.CASCADE, verbose_name=_('Заказчик'),
         null=True
     )
     car_class = models.CharField(

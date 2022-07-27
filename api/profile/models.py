@@ -35,7 +35,7 @@ class Client(models.Model):
         return f"{self.user.name} {self.user.surname} - {self.financial_turnover} р."
 
 
-class Contractor(models.Model):
+class Company(models.Model):
     name = models.CharField(
         _('Название'), max_length=128
     )
@@ -67,9 +67,9 @@ class Contractor(models.Model):
     )
 
     class Meta:
-        db_table = 'contractor'
-        verbose_name = 'Контрагент'
-        verbose_name_plural = 'Контрагенты'
+        db_table = 'company'
+        verbose_name = 'Компания'
+        verbose_name_plural = 'Компании'
 
     def __str__(self) -> str:
         return f"{self.name} - {self.financial_turnover}"

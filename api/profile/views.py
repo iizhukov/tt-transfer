@@ -13,7 +13,7 @@ from api.authentication.serializers import (
 from .serializers import (
     ChangePasswordSerializer, UserEditSerializer,
     AvatarSerializer, DocumentSerializer,
-    ContractorSerializer
+    CompanySerializer
 )
 
 
@@ -130,20 +130,20 @@ class UserListView(ListAPIView):
 
 
 class ContractorView(APIView):
-    serializer_class = ContractorSerializer
+    serializer_class = CompanySerializer
     # permission_classes = (AllowAny, )
 
     def get(self, request):
         user = request.user
     
-        if not getattr(user, "contractor", False):
+        if not getattr(user, "company", False):
             return Response(
                 {},
                 status=status.HTTP_204_NO_CONTENT
             )
 
         serializer = self.serializer_class(
-            data=model_to_dict(user.contractor)
+            data=model_to_dict(user.company)
         )
         serializer.is_valid()
 
