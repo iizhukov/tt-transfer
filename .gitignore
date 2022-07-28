@@ -27,18 +27,18 @@
 /frontend/yarn-error.log*
 
 #tt_transfer django
-/tt_transfer/__pycache__
+/tt_transfer/__pycache__/
 
 # api __pycache__
-/api/__pycache__
-/api/activityFeed/__pycache__
-/api/address/__pycache__
-/api/authentication/__pycache__
-/api/cars/__pycache__
-/api/drivers/__pycache__
-/api/orders/__pycache__
-/api/profile/__pycache__
-/api/tariffs/__pycache__
+/api/__pycache__/
+/api/activityFeed/__pycache__/
+/api/address/__pycache__/
+/api/authentication/__pycache__/
+/api/cars/__pycache__/
+/api/drivers/__pycache__/
+/api/orders/__pycache__/
+/api/profile/__pycache__/
+/api/tariffs/__pycache__/
 
 #api migrations
 api/activityFeed/migrations/*
