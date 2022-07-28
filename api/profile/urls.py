@@ -13,5 +13,5 @@ urlpatterns = [
     path('get-user-data/', views.GetUserDataView.as_view(), name="get_user_data"),
     path('user-list/', views.UserListView.as_view(), name="user_list"),
 
-    path('contractor/', views.ContractorView.as_view(), name="contractor"),
+    path('company/', views.ContractorView.as_view(), name="contractor"),
 ]

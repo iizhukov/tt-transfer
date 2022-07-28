@@ -36,12 +36,14 @@ def _document_path(instance, filename):
 
 def _path(instance, filename):
     format = filename.split(".")[-1]
-    path = os.path.join(settings.MEDIA_ROOT, "avatars/", instance.email)
+    path = os.path.join("/avatars/", instance.email)
 
     if os.path.exists(path):
         for file in os.listdir(path):
             if "avatar" in file:
                 os.remove(os.path.join(path, file))
+
+    print(os.path.join(path, f"avatar.{format}"))
 
     return os.path.join(path, f"avatar.{format}")
 
@@ -75,7 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         _('Подтвержден'), default=False,
     )
     avatar = models.ImageField(
-        _('Аватар'), upload_to=_path,
+        _('Аватар'), upload_to="avatars/",
         default="/avatars/default_avatar.jpg"
     )
     is_online = models.BooleanField(

@@ -233,6 +233,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 AUTH_USER_MODEL = 'authentication.User'
 ROOT_URLCONF = 'tt_transfer.urls'
@@ -242,6 +243,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 PROJECT_URL = "\\".join(BASE_DIR.split("\\")[:-1])
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 # FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, "temp\\")
