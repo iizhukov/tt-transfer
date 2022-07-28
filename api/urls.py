@@ -7,4 +7,5 @@ urlpatterns = [
     path('activity-feed/', include('api.activityFeed.urls')),
     path('cars/', include('api.cars.urls')),
     path('drivers/', include('api.drivers.urls')),
+    path('address/', include('api.address.urls')),
 ]

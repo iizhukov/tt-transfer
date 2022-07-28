@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 
+from api.authentication.models import UserDocument
+
 
 class HaveRefreshTokenMiddleware:
     def __init__(self, get_response):
@@ -26,7 +28,18 @@ class HaveTokenToMediaMiddleware:
 
         print(request.user, request.user.is_authenticated)
         if "/media/documents/" in request.path:
-            if not request.user.is_authenticated or f"/media/documents/{request.user.email}" not in request.path:
+            if not request.user.is_authenticated:
+                return HttpResponse(
+                    "Not enough rights",
+                    status=401
+                )
+
+            docs = UserDocument.objects.filter(user=request.user).values_list("document")
+            print(docs)
+            for i in docs:
+                if "/media/" + i[0] in request.path:
+                    break
+            else:
                 return HttpResponse(
                     "Not enough rights",
                     status=401

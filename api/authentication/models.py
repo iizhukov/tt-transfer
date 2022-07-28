@@ -138,7 +138,7 @@ class UserDocument(models.Model):
         verbose_name=_('Пользователь')
     )
     document = models.FileField(
-        _('Документ'), upload_to=_document_path
+        _('Документ'), upload_to="documents/"
     )
 
     class Meta:
