@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import (
+    PriceToCarClass, IntracityTariff,
+)
+
+
+admin.site.register(PriceToCarClass)
+admin.site.register(IntracityTariff)

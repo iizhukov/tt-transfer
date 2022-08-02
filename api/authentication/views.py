@@ -35,7 +35,7 @@ class CreateUserView(APIView):
             "passport": "",
             "role": "c",
             "confirmed": False,
-            "avatar": "/avatars/default_avatar.jpg"
+            "avatar": "avatars/default_avatar.png"
         }
         user_sample.update(request.data)
         serializered_user = UserSerializer(data=user_sample)

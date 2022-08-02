@@ -7,7 +7,7 @@ from api.cars.models import CAR_CLASSES
 
 ZONE_COLORS = (
     ('red', 'Красная'),
-    ('green', 'Оранжевая'),
+    ('green', 'Зеленая'),
     ('yellow', 'Желтая'),
     ('blue', 'Синяя'),
 )
@@ -47,6 +47,10 @@ class Address(models.Model):
         _('Номер дома'), max_length=12,
         default="1",
     )
+    coordinates = models.ForeignKey(
+        "Coordinate", models.CASCADE,
+        null=True, blank=True
+    )
 
     class Meta:
         db_table = "address"
@@ -59,22 +63,8 @@ class Address(models.Model):
     def model_as_raw(self, region=True):
         return f"{self.city}, {self.street}, {self.number }"
 
-
-class PriceToCarClass(models.Model):
-    car_class = models.CharField(
-        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=32
-    )
-    price = models.IntegerField(
-        _('Цена')
-    )
-
-    class Meta:
-        db_table = "car_zone_price2car_class"
-        verbose_name = "Цена к классу"
-        verbose_name_plural = "Цены к классам"
-    
-    def __str__(self) -> str:
-        return f"{self.car_class} - {self.price}"
+    def save(self, *args, **kwargs):
+        return super().save(args, kwargs)
 
 
 class Coordinate(models.Model):
@@ -100,9 +90,6 @@ class CityZone(models.Model):
     )
     color = models.CharField(
         verbose_name=_('Цвет'), choices=ZONE_COLORS, max_length=12
-    )
-    prices = models.ManyToManyField(
-        PriceToCarClass,
     )
     coordinates = models.ManyToManyField(
         Coordinate,

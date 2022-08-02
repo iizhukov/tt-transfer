@@ -50,3 +50,11 @@ class Order(models.Model):
     price = models.IntegerField(
         _('Цена'), default=claculate_price
     )
+
+    class Meta:
+        db_table = "orders"
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+
+    def __str__(self) -> str:
+        return f"{self.contractor}"

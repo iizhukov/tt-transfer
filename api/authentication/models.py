@@ -78,7 +78,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     avatar = models.ImageField(
         _('Аватар'), upload_to="avatars/",
-        default="/avatars/default_avatar.jpg"
+        default="/avatars/default_avatar.png"
     )
     is_online = models.BooleanField(
         _('Онлайн'), default=False

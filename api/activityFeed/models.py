@@ -47,7 +47,7 @@ def upload_files_to(instance, filename):
 class ImageModel(models.Model):
     image = models.ImageField(
         _('Изображение'),
-        upload_to=upload_images_to,
+        upload_to="news/images/",
     )
     news = models.ForeignKey(
         "News", models.CASCADE,
@@ -82,7 +82,7 @@ class ImageModel(models.Model):
 class FileModel(models.Model):
     file = models.FileField(
         _('Изображение'),
-        upload_to=upload_files_to,
+        upload_to="news/files/",
     )
     news = models.ForeignKey(
         "News", models.CASCADE,

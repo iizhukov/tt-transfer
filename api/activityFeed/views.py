@@ -17,7 +17,9 @@ from .serializers import (
 )
 
 
-class NewsView(APIView):    
+class NewsView(APIView):  
+    # permission_classes = (AllowAny, )
+  
     def get(self, request, limit=None):
         user = request.user
         # user = User.objects.get(email="admin@adm.py")

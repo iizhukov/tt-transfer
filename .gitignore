@@ -70,9 +70,11 @@ api/tariffs/migrations/*
 /media/avatars/*
 /media/documents/*
 /media/news/*
+/media/news/files/*
+/media/news/images/*
 
 !/media/avatars/
 !/media/documents/
 !/media/news/files/
 !/media/news/images/
-!/media/avatars/default_avatar.jpeg
+!/media/avatars/default_avatar.png
