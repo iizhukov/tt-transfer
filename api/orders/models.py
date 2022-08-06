@@ -25,7 +25,7 @@ class Order(models.Model):
         null=True
     )
     car_class = models.CharField(
-        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=12,
+        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=24,
     )
 
     client_name = models.CharField(

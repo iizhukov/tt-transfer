@@ -144,7 +144,7 @@ class ZonesView(APIView):
 
         for latitude, longitude in request.data.get("coordinates"):
             print(latitude, longitude)
-            coords = Coordinate(
+            coords = Coordinate.objects.get_or_create(
                 latitude=latitude,
                 longitude=longitude
             )
@@ -157,6 +157,65 @@ class ZonesView(APIView):
             data=CityZone.objects.get(
                 city=city
             )
+        )
+        serializer.is_valid()
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def put(self, request):
+        region = request.data.get("region")
+        city = request.data.get("city")
+        color = request.data.get("color")
+
+        city = City.objects.filter(
+            region=region,
+            city=city
+        ).first()
+
+        if not city:
+            return Response(
+                {"detail": "Такого города нет"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        zone = CityZone.objects.filter(
+            city=city,
+            color=color
+        ).first()
+
+        if not zone:
+            return Response(
+                {"detail": "Такой зоны нет"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        new_color = request.data.get("new_color")
+        new_coords = request.data.get("new_coordinates")
+
+        if new_color:
+            zone.color = new_color
+        
+        if new_coords:
+            zone.coordinates.clear()
+
+            for latitude, longitude in new_coords:
+                print(latitude, longitude)
+                coords = Coordinate.objects.get_or_create(
+                    latitude=latitude,
+                    longitude=longitude
+                )
+                coords.save()
+
+                zone.coordinates.add(coords)
+
+        zone.save()
+        print(zone)
+
+        serializer = self.serializer_class(
+            data=model_to_dict(zone)
         )
         serializer.is_valid()
 

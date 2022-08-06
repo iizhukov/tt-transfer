@@ -21,6 +21,13 @@ from api.authentication.models import User
 CAR_CLASSES = (
     ('business', 'Бизнес'),
     ('standart', 'Стандарт'),
+    ('representative', 'Представительский'),
+    ('minivan', 'Минивен'),
+    ('minibus', 'Микроавтобус'),
+    ('comfort', 'Комфорт'),
+    ('bus', 'Автобус'),
+    ('business_plus', 'Бизнес плюс'),
+    ('cargo', 'Грузовой')
 )
 
 
@@ -46,7 +53,7 @@ class Car(models.Model):
         _('ПТС'), max_length=15,
     )
     car_class = models.CharField(
-        _("Класс"), choices=CAR_CLASSES, max_length=12,
+        _("Класс"), choices=CAR_CLASSES, max_length=24,
     )
 
     class Meta:

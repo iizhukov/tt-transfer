@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.constraints import UniqueConstraint
 
 from api.cars.models import CAR_CLASSES
 
@@ -10,6 +11,7 @@ ZONE_COLORS = (
     ('green', 'Зеленая'),
     ('yellow', 'Желтая'),
     ('blue', 'Синяя'),
+    ('orange', 'Оранжевая')
 )
 
 
@@ -79,6 +81,12 @@ class Coordinate(models.Model):
         db_table = "car_zone_coordinate"
         verbose_name = "Координата"
         verbose_name_plural = "Координаты"
+        constraints = [
+            UniqueConstraint(
+                fields=('latitude', 'longitude'),
+                name="unique_coords"
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.latitude}, {self.longitude}"
