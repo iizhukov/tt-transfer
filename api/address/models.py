@@ -78,7 +78,7 @@ class Coordinate(models.Model):
     )
 
     class Meta:
-        db_table = "car_zone_coordinate"
+        db_table = "city_zone_coordinate"
         verbose_name = "Координата"
         verbose_name_plural = "Координаты"
         constraints = [
@@ -104,7 +104,7 @@ class CityZone(models.Model):
     )
 
     class Meta:
-        db_table = "car_zone"
+        db_table = "city_zone"
         verbose_name = "Зона города"
         verbose_name_plural = "Зоны городов"
 

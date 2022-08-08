@@ -41,14 +41,14 @@
 /api/tariffs/__pycache__/
 
 #api migrations
-api/activityFeed/migrations/*
-api/address/migrations/*
-api/authentication/migrations/*
-api/cars/migrations/*
-api/drivers/migrations/*
-api/orders/migrations/*
-api/profile/migrations/*
-api/tariffs/migrations/*
+# api/activityFeed/migrations/*
+# api/address/migrations/*
+# api/authentication/migrations/*
+# api/cars/migrations/*
+# api/drivers/migrations/*
+# api/orders/migrations/*
+# api/profile/migrations/*
+# api/tariffs/migrations/*
 
 #except
 !api/activityFeed/migrations/__init__.py
