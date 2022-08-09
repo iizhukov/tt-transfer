@@ -109,4 +109,4 @@ class CityZone(models.Model):
         verbose_name_plural = "Зоны городов"
 
     def __str__(self) -> str:
-        return f"{self.city.city}, {self.color}"
+        return f"{self.pk}: {self.city.city}, {self.color}"

@@ -69,7 +69,6 @@ class AddAddressView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
         
-        
         city_serializer = CitySerializer(data=request.data)
         city_serializer.is_valid()
 
@@ -90,9 +89,8 @@ class AddAddressView(APIView):
         address.save()
 
         address_serializer = AddressSerializer(
-            data=model_to_dict(address)
+            instance=address
         )
-        address_serializer.is_valid()
 
         return Response(
             address_serializer.data,
@@ -107,10 +105,8 @@ class ZonesView(APIView):
         serializer = self.serializer_class(
             data=CityZone.objects.filter(
                 city=City.objects.filter(
-                    # region=request.data.get("region"),
-                    # city=request.data.get("city")
-                    region="Московская область",
-                    city="Москва"
+                    region=request.data.get("region"),
+                    city=request.data.get("city")
                 ).first()
             ),
             many=True
@@ -134,7 +130,6 @@ class ZonesView(APIView):
                 city=request.data.get("city")
             )
             city.save()
-            print(model_to_dict(city))
 
         zone = CityZone(
             city=city,
@@ -158,71 +153,11 @@ class ZonesView(APIView):
 
 
         serializer = CityZoneSerializer(
-            data=CityZone.objects.get(
+            instance=CityZone.objects.get(
                 city=city,
                 color=request.data.get("color")
             )
         )
-        serializer.is_valid()
-
-        return Response(
-            serializer.data,
-            status.HTTP_200_OK
-        )
-
-    def put(self, request):
-        region = request.data.get("region")
-        city = request.data.get("city")
-        color = request.data.get("color")
-
-        city = City.objects.filter(
-            region=region,
-            city=city
-        ).first()
-
-        if not city:
-            return Response(
-                {"detail": "Такого города нет"},
-                status.HTTP_400_BAD_REQUEST
-            )
-
-        zone = CityZone.objects.filter(
-            city=city,
-            color=color
-        ).first()
-
-        if not zone:
-            return Response(
-                {"detail": "Такой зоны нет"},
-                status.HTTP_400_BAD_REQUEST
-            )
-
-        new_color = request.data.get("new_color")
-        new_coords = request.data.get("new_coordinates")
-
-        if new_color:
-            zone.color = new_color
-        
-        if new_coords:
-            zone.coordinates.clear()
-
-            for latitude, longitude in new_coords:
-                print(latitude, longitude)
-                coords = Coordinate.objects.get_or_create(
-                    latitude=latitude,
-                    longitude=longitude
-                )
-                coords.save()
-
-                zone.coordinates.add(coords)
-
-        zone.save()
-        print(zone)
-
-        serializer = self.serializer_class(
-            data=model_to_dict(zone)
-        )
-        serializer.is_valid()
 
         return Response(
             serializer.data,
@@ -243,9 +178,60 @@ class EditZoneView(APIView):
             )
 
         serializer = self.serializer_class(
-            data=model_to_dict(zone)
+            instance=zone
         )
-        serializer.is_valid()
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def put(self, request, id):
+        zone = CityZone.objects.filter(
+            pk=id
+        ).first()
+
+        if not zone:
+            return Response(
+                {"detail": "Такой зоны нет"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        if CityZone.objects.filter(
+            city=zone.city,
+            color=request.data.get("new_color")
+        ).first():
+            return Response(
+                {"detail": "Зона с таким цветом уже существует"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        new_color = request.data.get("new_color")
+        new_coords = request.data.get("new_coordinates")
+
+        if new_color:
+            zone.color = new_color
+        
+        if new_coords:
+            zone.coordinates.clear()
+
+            for latitude, longitude in new_coords:
+                print(latitude, longitude)
+                coords, created = Coordinate.objects.get_or_create(
+                    latitude=latitude,
+                    longitude=longitude
+                )
+
+                if created:
+                    coords.save()
+
+                zone.coordinates.add(coords)
+
+        zone.save()
+
+        serializer = self.serializer_class(
+            instance=zone
+        )
 
         return Response(
             serializer.data,

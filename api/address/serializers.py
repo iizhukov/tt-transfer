@@ -30,5 +30,5 @@ class AddAddressSerializer(serializers.Serializer):
 class CityZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CityZone
-        fields = "__all__"
+        fields = ('city', 'color', 'coordinates')
         depth = 1
