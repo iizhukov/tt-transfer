@@ -107,10 +107,10 @@ class ZonesView(APIView):
         serializer = self.serializer_class(
             data=CityZone.objects.filter(
                 city=City.objects.filter(
-                    region=request.data.get("region"),
-                    city=request.data.get("city")
-                    # region="Оренбургская область",
-                    # city="Оренбург"
+                    # region=request.data.get("region"),
+                    # city=request.data.get("city")
+                    region="Московская область",
+                    city="Москва"
                 ).first()
             ),
             many=True
@@ -142,20 +142,25 @@ class ZonesView(APIView):
         )
         zone.save()
 
-        for latitude, longitude in request.data.get("coordinates"):
+        lst = request.data.get("coordinates")
+
+        for latitude, longitude in lst:
             print(latitude, longitude)
-            coords = Coordinate.objects.get_or_create(
+            coords, created = Coordinate.objects.get_or_create(
                 latitude=latitude,
                 longitude=longitude
             )
-            coords.save()
+
+            if created:
+                coords.save()
 
             zone.coordinates.add(coords)
-        
+
 
         serializer = CityZoneSerializer(
             data=CityZone.objects.get(
-                city=city
+                city=city,
+                color=request.data.get("color")
             )
         )
         serializer.is_valid()
@@ -221,5 +226,44 @@ class ZonesView(APIView):
 
         return Response(
             serializer.data,
+            status.HTTP_200_OK
+        )
+
+
+class EditZoneView(APIView):
+    serializer_class = CityZoneSerializer
+
+    def get(self, reqeust, id: int):
+        zone = CityZone.objects.filter(id=id).first()
+
+        if not zone:
+            return Response(
+                {"detail": "Not Found"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = self.serializer_class(
+            data=model_to_dict(zone)
+        )
+        serializer.is_valid()
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def delete(self, request, id: int):
+        zone = CityZone.objects.filter(id=id).first()
+
+        if not zone:
+            return Response(
+                {"detail": "Not Found"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        zone.delete()
+
+        return Response(
+            {"detail": "deleted"},
             status.HTTP_200_OK
         )

@@ -50,6 +50,15 @@
 # api/profile/migrations/*
 # api/tariffs/migrations/*
 
+api/activityFeed/migrations/__pycache__
+api/address/migrations/__pycache__
+api/authentication/migrations/__pycache__
+api/cars/migrations/__pycache__
+api/drivers/migrations/__pycache__
+api/orders/migrations/__pycache__
+api/profile/migrations/__pycache__
+api/tariffs/migrations/__pycache__
+
 #except
 !api/activityFeed/migrations/__init__.py
 !api/address/migrations/__init__.py

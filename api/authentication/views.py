@@ -216,6 +216,8 @@ class CookieTokenRefreshView(TokenRefreshView):
 
                 response.data["user"] = serialized_user.data
 
+            print(access)
+
         return super().finalize_response(request, response, *args, **kwargs)
 
 
