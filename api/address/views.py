@@ -102,11 +102,14 @@ class ZonesView(APIView):
     serializer_class = CityZoneSerializer
     
     def get(self, request):
+        city_ = request.query_params.get("city")
+        region_ = request.query_params.get("region")
+
         serializer = self.serializer_class(
             data=CityZone.objects.filter(
                 city=City.objects.filter(
-                    region=request.data.get("region"),
-                    city=request.data.get("city")
+                    region=region_,
+                    city=city_
                 ).first()
             ),
             many=True
