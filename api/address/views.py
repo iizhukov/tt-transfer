@@ -122,7 +122,7 @@ class ZonesView(APIView):
             for coords in zone["coordinates"]:
                 coordinates.append([coords["latitude"], coords["longitude"]])
 
-            serializer.data[ind]["coordinates"] = coordinates
+            serializer.data[ind]["coordinates"] = [coordinates]
 
         return Response(
             serializer.data,
@@ -207,7 +207,7 @@ class EditZoneView(APIView):
             )
 
         zone.color = request.data.get("color") or zone.color
-        new_coords = request.data.get("coordinates")
+        new_coords = request.data.get("coordinates")[0]
 
 
         if new_coords:
