@@ -116,6 +116,14 @@ class ZonesView(APIView):
         )
         serializer.is_valid()
 
+        for ind, zone in enumerate(serializer.data):
+            coordinates = []
+
+            for coords in zone["coordinates"]:
+                coordinates.append([coords["latitude"], coords["longitude"]])
+
+            serializer.data[ind]["coordinates"] = coordinates
+
         return Response(
             serializer.data,
             status.HTTP_200_OK
@@ -156,10 +164,7 @@ class ZonesView(APIView):
 
 
         serializer = CityZoneSerializer(
-            instance=CityZone.objects.get(
-                city=city,
-                color=request.data.get("color")
-            )
+            instance=zone
         )
 
         return Response(
