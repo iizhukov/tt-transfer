@@ -148,7 +148,8 @@ class ZonesView(APIView):
         )
         zone.save()
 
-        lst = request.data.get("coordinates")
+        lst = request.data.get("coordinates")[0]
+        print(lst)
 
         for latitude, longitude in lst:
             print(latitude, longitude)
