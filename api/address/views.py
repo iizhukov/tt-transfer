@@ -206,21 +206,10 @@ class EditZoneView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
 
-        if CityZone.objects.filter(
-            city=zone.city,
-            color=request.data.get("new_color")
-        ).first():
-            return Response(
-                {"detail": "Зона с таким цветом уже существует"},
-                status.HTTP_400_BAD_REQUEST
-            )
+        zone.color = request.data.get("color") or zone.color
+        new_coords = request.data.get("coordinates")
 
-        new_color = request.data.get("new_color")
-        new_coords = request.data.get("new_coordinates")
 
-        if new_color:
-            zone.color = new_color
-        
         if new_coords:
             zone.coordinates.clear()
 
