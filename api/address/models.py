@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.constraints import UniqueConstraint
 
 from api.cars.models import CAR_CLASSES
+from api.request import GetCoordsByAddress
 
 
 ZONE_COLORS = (
@@ -11,7 +12,6 @@ ZONE_COLORS = (
     ('green', 'Зеленая'),
     ('yellow', 'Желтая'),
     ('blue', 'Синяя'),
-    ('orange', 'Оранжевая')
 )
 
 
@@ -28,6 +28,11 @@ class City(models.Model):
         _('Город'), max_length=128,
     )
 
+    center = models.ForeignKey(
+        "Coordinate", models.CASCADE,
+        null=True, blank=True
+    )
+
     class Meta:
         db_table = "address_city"
         verbose_name = "Город"
@@ -35,6 +40,21 @@ class City(models.Model):
     
     def __str__(self) -> str:
         return f"{self.country}, {self.region}, {self.city}"
+
+    def save(self, *args, **kwargs):
+        latitude, longitude = GetCoordsByAddress.get(
+            self.__str__()
+        )
+
+        if longitude and latitude:
+            self.center = Coordinate.objects.get_or_create(
+                latitude=latitude,
+                longitude=longitude
+            )[0]
+        else:
+            self.center = None
+
+        return super().save(args, kwargs)
 
 
 class Address(models.Model):
@@ -49,9 +69,10 @@ class Address(models.Model):
         _('Номер дома'), max_length=12,
         default="1",
     )
-    coordinates = models.ForeignKey(
+    coordinate = models.ForeignKey(
         "Coordinate", models.CASCADE,
-        null=True, blank=True
+        verbose_name=_('Координаты'),
+        null=True, blank=True,
     )
 
     class Meta:
@@ -63,9 +84,21 @@ class Address(models.Model):
         return self.model_as_raw()
 
     def model_as_raw(self, region=True):
-        return f"{self.city}, {self.street}, {self.number }"
+        return f"{self.city}, {self.street}, {self.number}"
 
     def save(self, *args, **kwargs):
+        latitude, longitude = GetCoordsByAddress.get(
+            self.model_as_raw()
+        )
+
+        if longitude and latitude:
+            self.coordinate = Coordinate.objects.get_or_create(
+                latitude=latitude,
+                longitude=longitude
+            )[0]
+        else:
+            self.coordinate = None
+
         return super().save(args, kwargs)
 
 
@@ -91,6 +124,9 @@ class Coordinate(models.Model):
     def __str__(self) -> str:
         return f"{self.latitude}, {self.longitude}"
 
+    def get_tuple(self):
+        return (self.latitude, self.longitude)
+
 
 class CityZone(models.Model):
     city = models.ForeignKey(
@@ -110,3 +146,11 @@ class CityZone(models.Model):
 
     def __str__(self) -> str:
         return f"{self.pk}: {self.city.city}, {self.color}"
+
+    def get_coordinates_as_list(self):
+        coords = []
+
+        for coord in self.coordinates.all():
+            coords.append([coord.latitude, coord.longitude])
+
+        return coords

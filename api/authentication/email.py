@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.mail import EmailMessage
 
-from api.email import SendMailManager
+from api.mail import SendMailManager
 
 
 class SendCode(SendMailManager):

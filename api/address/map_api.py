@@ -9,10 +9,8 @@ PAYLOAD = {}
 HEADERS = {}
 
 def get_distance_between_addresses(address1, address2):
-    # raw_address1 = address1.model_as_raw()
-    # raw_address2 = address2.model_as_raw()
-    raw_address1 = "Оренбург, переулок Лужский, 3"
-    raw_address2 = "Оренбург, улица Садовое Кольцо, 10"
+    raw_address1 = address1.model_as_raw()
+    raw_address2 = address2.model_as_raw()
 
     response = request(
         "GET",
@@ -24,4 +22,10 @@ def get_distance_between_addresses(address1, address2):
     print(response.text)
 
 
-get_distance_between_addresses("", "")
+def get_coords_of_city_center(region, city):
+    raw_data = f"Россия, {region}, {city}"
+
+    response = request(
+        "GET",
+        URL
+    )

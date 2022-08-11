@@ -33,6 +33,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
+    # map
+    'map.apps.MapConfig',
+
     # api
     'api.authentication',
     'api.address',

@@ -7,13 +7,14 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.City
         fields = "__all__"
+        depth = 1
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Address
         fields = "__all__"
-        depth = 1
+        depth = 2
 
 
 class AddAddressSerializer(serializers.Serializer):
@@ -31,4 +32,19 @@ class CityZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CityZone
         fields = "__all__"
+        depth = 2
+
+
+class GetZoneByCoordsSerializer(serializers.Serializer):
+    region = serializers.CharField()
+    city = serializers.CharField()
+    address_latitude = serializers.FloatField()
+    address_longitude = serializers.FloatField()
+
+    class Meta:
+        fields = "__all__"
         depth = 1
+
+
+class GetZoneByAddressSerializer(serializers.Serializer):
+    pass
