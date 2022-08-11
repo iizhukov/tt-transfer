@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from api.address.models import CityZone, City
 
-def index(request):
+
+@xframe_options_exempt
+def zones(request):
     region_ = request.GET.get("region")
     city_ = request.GET.get("city")
 
@@ -13,16 +16,10 @@ def index(request):
 
     print(city)
 
-    latitude = city.center.latitude
-    longitude = city.center.longitude
-
     return render(
         request,
-        "index.html",
+        "zones.html",
         context={
-            "region": region_,
-            "city": city_,
-            "city_latitude": latitude,
-            "city_longitude": longitude,
+            "city": city
         }
     )

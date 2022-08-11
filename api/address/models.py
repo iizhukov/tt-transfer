@@ -42,19 +42,22 @@ class City(models.Model):
         return f"{self.country}, {self.region}, {self.city}"
 
     def save(self, *args, **kwargs):
+        self.center = self._get_center_from_request()
+
+        return super().save(args, kwargs)
+
+    def _get_center_from_request(self):
         latitude, longitude = GetCoordsByAddress.get(
             self.__str__()
         )
 
         if longitude and latitude:
-            self.center = Coordinate.objects.get_or_create(
+            return Coordinate.objects.get_or_create(
                 latitude=latitude,
                 longitude=longitude
             )[0]
-        else:
-            self.center = None
 
-        return super().save(args, kwargs)
+        return None
 
 
 class Address(models.Model):
