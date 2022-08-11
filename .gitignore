@@ -29,6 +29,10 @@
 #tt_transfer django
 /tt_transfer/__pycache__/
 
+# map
+/map/__pycache__
+/map/migrations/__pycache__
+
 # api __pycache__
 /api/__pycache__/
 /api/activityFeed/__pycache__/
