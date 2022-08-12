@@ -30,11 +30,11 @@ def zones(request):
 @permission_classes((AllowAny, ))
 def route(request):
     context = {
-        "lat1": request.GET.get("lat1"),
-        "lon1": request.GET.get("lon1"),
-        "lat2": request.GET.get("lat2"),
-        "lon2": request.GET.get("lon2"),
+        "lat": request.GET.getlist("lat"),
+        "lon": request.GET.getlist("lon"),
     }
+
+    print(request.GET)
 
     region_ = request.GET.get("region")
     city_ = request.GET.get("city")

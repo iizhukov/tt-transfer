@@ -21,7 +21,10 @@
 
         var map = new ymaps.Map("map", {
             center: [lat, log],
-            zoom: 11
+            zoom: 12,
+            controls: [
+                "zoomControl",
+            ]
         }, {
             searchControlProvider: 'yandex#search'
         });

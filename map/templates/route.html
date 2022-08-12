@@ -15,28 +15,36 @@
 <script>
 
     function init () {
-        let lat1 = +"{{ lat1 }}", lon1 = +"{{ lon1 }}",
-            lat2 = +"{{ lat2 }}", lon2 = +"{{ lon2 }}";
+        let lat = "{{ lat|safe }}", lon = "{{ lon|safe }}";
+
+        lat = lat.replace("['", "").replace("'']", "").split("', '").map(parseFloat)
+        lon = lon.replace("['", "").replace("'']", "").split("', '").map(parseFloat)
+
+        // alert(`(${lat1}, ${lon1}) (${lat2}, ${lon1})`)
+        // alert("{{ lat }}")
 
         var multiRoute = new ymaps.multiRouter.MultiRoute({
             referencePoints: [
-                [lat1, lon1],
-                [lat2, lon2],
+                [lat[0], lon[0]],
+                [lat[lat.length - 1], lon[lon.length - 1]],
             ],
             params: {
-                results: 2,
+                results: 1,
                 avoidTrafficJams: true
             }
         }, {
             boundsAutoApply: true
         });
 
-        let lat = +"{{ city.center.latitude }}".replace(",", ".");
-        let lon = +"{{ city.center.longitude }}".replace(",", ".");
+        let city_lat = +"{{ city.center.latitude }}".replace(",", ".");
+        let city_lon = +"{{ city.center.longitude }}".replace(",", ".");
 
         var map = new ymaps.Map("map", {
-            center: [lat, lon],
-            zoom: 11
+            center: [city_lat, city_lon],
+            zoom: 12,
+            controls: [
+                "zoomControl"
+            ]
         }, {
             searchControlProvider: 'yandex#search'
         });
@@ -81,6 +89,16 @@
                 map.geoObjects.add(zone);
             });
         })
+        map.behaviors.disable('scrollZoom');
+
+        var referencePoints = multiRoute.model.getReferencePoints();
+
+        for (let i = 1; i + 1 < lat.length; ++i) {
+            referencePoints.splice(i, 0, [lat[i], lon[i]]);
+        }
+
+        multiRoute.model.setReferencePoints(referencePoints);
+
         map.geoObjects.add(multiRoute);
     }
 
