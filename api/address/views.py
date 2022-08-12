@@ -38,8 +38,12 @@ class CityView(APIView):
                 {"detail": "Данные невалидны"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        serializer.save()
+
+        City.objects.get_or_create(
+            city=serializer.data.get("city"),
+            region=serializer.data.get("region")
+        )
+
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
@@ -75,14 +79,10 @@ class AddAddressView(APIView):
         city_serializer = CitySerializer(data=request.data)
         city_serializer.is_valid()
 
-        if not City.objects.filter(
+        city = City.objects.get_or_create(
+            region=city_serializer.validated_data.get('region'),
             city=city_serializer.validated_data.get('city')
-        ).first():
-            city_serializer.save()
-
-        city = City.objects.filter(
-            city=request.data.get('city')
-        ).first()
+        )[0]
 
         address = Address(
             city=city,
@@ -103,19 +103,23 @@ class AddAddressView(APIView):
 
 class ZonesView(APIView):
     serializer_class = CityZoneSerializer
+    permission_classes = (AllowAny, )
     
     def get(self, request):
         city_ = request.query_params.get("city")
         region_ = request.query_params.get("region")
 
-        print(city_, region_)
+        city, created = City.objects.get_or_create(
+            region=region_,
+            city=city_
+        )
+
+        if created:
+            city.save()
 
         serializer = self.serializer_class(
             data=CityZone.objects.filter(
-                city=City.objects.filter(
-                    region=region_,
-                    city=city_
-                ).first()
+                city=city
             ),
             many=True
         )
@@ -135,17 +139,10 @@ class ZonesView(APIView):
         )
 
     def post(self, request):
-        city = City.objects.filter(
+        city = City.objects.get_or_create(
             region=request.data.get("region"),
             city=request.data.get("city")
-        ).first()
-
-        if not city:
-            city = City(
-                region=request.data.get("region"),
-                city=request.data.get("city")
-            )
-            city.save()
+        )[0]
 
         zone = CityZone(
             city=city,
@@ -153,10 +150,9 @@ class ZonesView(APIView):
         )
         zone.save()
 
-        lst = request.data.get("coordinates")[0]
-        print(lst)
+        coordinates = request.data.get("coordinates")[0]
 
-        for latitude, longitude in lst:
+        for latitude, longitude in coordinates:
             print(latitude, longitude)
             coords, created = Coordinate.objects.get_or_create(
                 latitude=latitude,
@@ -167,7 +163,6 @@ class ZonesView(APIView):
                 coords.save()
 
             zone.coordinates.add(coords)
-
 
         serializer = CityZoneSerializer(
             instance=zone
@@ -331,10 +326,10 @@ class GetCityCenter(APIView):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
-        city = City.objects.filter(
+        city = City.objects.get_or_create(
             region=region_,
             city=city_
-        ).first()
+        )[0]
 
         latitude = city.center.latitude
         longitude = city.canter.longitude

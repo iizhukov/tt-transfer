@@ -43,8 +43,12 @@ class City(models.Model):
 
     def save(self, *args, **kwargs):
         self.center = self._get_center_from_request()
+        print("save")
 
-        return super().save(args, kwargs)
+        if "(" in self.city:
+            self.city = self.city.split("(")[0].rstrip()
+
+        return super().save(*args, **kwargs)
 
     def _get_center_from_request(self):
         latitude, longitude = GetCoordsByAddress.get(
@@ -90,19 +94,22 @@ class Address(models.Model):
         return f"{self.city}, {self.street}, {self.number}"
 
     def save(self, *args, **kwargs):
+        self.coordinate = self._get_coords_from_request()
+
+        return super().save(*args, **kwargs)
+
+    def _get_coords_from_request(self):
         latitude, longitude = GetCoordsByAddress.get(
             self.model_as_raw()
         )
 
         if longitude and latitude:
-            self.coordinate = Coordinate.objects.get_or_create(
+            return Coordinate.objects.get_or_create(
                 latitude=latitude,
                 longitude=longitude
             )[0]
-        else:
-            self.coordinate = None
 
-        return super().save(args, kwargs)
+        return None
 
 
 class Coordinate(models.Model):

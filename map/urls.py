@@ -4,5 +4,6 @@ from . import views
 
 
 urlpatterns = [
-    path('zones/', views.zones, name="map_zones")
+    path('zones/', views.zones, name="map_zones"),
+    path('route/', views.route, name="map_route")
 ]
