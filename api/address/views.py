@@ -39,9 +39,13 @@ class CityView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        City.objects.get_or_create(
+        city, created = City.objects.get_or_create(
             city=serializer.data.get("city"),
             region=serializer.data.get("region")
+        )
+
+        serializer = self.serializer_class(
+            instance=city
         )
 
         return Response(
@@ -109,13 +113,10 @@ class ZonesView(APIView):
         city_ = request.query_params.get("city")
         region_ = request.query_params.get("region")
 
-        city, created = City.objects.get_or_create(
+        city = City.objects.get(
             region=region_,
             city=city_
         )
-
-        if created:
-            city.save()
 
         serializer = self.serializer_class(
             data=CityZone.objects.filter(
@@ -139,10 +140,10 @@ class ZonesView(APIView):
         )
 
     def post(self, request):
-        city = City.objects.get_or_create(
+        city = City.objects.get(
             region=request.data.get("region"),
             city=request.data.get("city")
-        )[0]
+        )
 
         zone = CityZone(
             city=city,

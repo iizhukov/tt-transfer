@@ -12,13 +12,10 @@ def zones(request):
     region_ = request.GET.get("region")
     city_ = request.GET.get("city")
 
-    city, created = City.objects.get_or_create(
+    city = City.objects.get(
         region=region_,
         city=city_
     )
-
-    if created:
-        city.save()
 
     return render(
         request,
@@ -43,13 +40,12 @@ def route(request):
     city_ = request.GET.get("city")
 
     if region_ and city_:
-        city = City.objects.get_or_create(
+        city = City.objects.get(
             region=region_,
             city=city_
-        )[0]
+        )
 
         context["city"] = city
-
 
     print(context)
 
