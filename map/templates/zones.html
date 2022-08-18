@@ -36,28 +36,40 @@
         }).then((zones) => {
             console.log(zones);
 
-            zones.forEach(element => {
-                let color = "";
+            let number_by_color = new Proxy({}, {
+                get: (target, name) => name in target ? target[name] : 0
+            })
+
+            zones.forEach((element, ind) => {
+                let color = "", ru_color="", number;
 
                 switch (element.color) {
                     case "green":
                         color = "#8DC73F";
+                        ru_color = "Зеленая";
+                        number = ++number_by_color[ru_color];
                         break;
                     case "blue":
                         color = "#337AB7";
+                        ru_color = "Синяя";
+                        number = ++number_by_color[ru_color];
                         break;
                     case "red":
                         color = "#DB5454";
+                        ru_color = "Красная";
+                        number = ++number_by_color[ru_color];
                         break;
                     case "yellow":
                         color = "#EAE509";
+                        ru_color = "Желтая";
+                        number = ++number_by_color[ru_color];
                         break;
                 }
 
                 var zone = new ymaps.Polygon(
                     element.coordinates,
                     {
-                        hintContent: `${element.color} zone`
+                        hintContent: `${ru_color} зона №${number}`
                     },
                     {
                         fillOpacity: 0.5,

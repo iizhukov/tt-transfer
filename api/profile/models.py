@@ -42,7 +42,7 @@ class Company(models.Model):
     location = models.ForeignKey(
         Address, models.CASCADE, verbose_name=_('Адрес')
     )
-    responsible = models.OneToOneField(
+    user = models.OneToOneField(
         User, models.CASCADE, verbose_name=_('Ответственный')
     )
     financial_turnover = models.IntegerField(
@@ -73,3 +73,17 @@ class Company(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} - {self.financial_turnover}"
+
+
+class Manager(models.Model):
+    user = models.OneToOneField(
+        User, models.CASCADE, verbose_name=_('Пользователь')
+    )
+
+    class Meta:
+        db_table = "manager"
+        verbose_name = "Менеджер"
+        verbose_name_plural = "Менеджеры"
+
+    def __str__(self) -> str:
+        return f"{self.user}"

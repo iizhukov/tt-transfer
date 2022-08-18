@@ -46,5 +46,12 @@ class GetZoneByCoordsSerializer(serializers.Serializer):
         depth = 1
 
 
+class HubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Hub
+        fields = "__all__"
+        depth = 1
+
+
 class GetZoneByAddressSerializer(serializers.Serializer):
     pass

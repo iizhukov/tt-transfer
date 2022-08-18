@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         if not User.objects.filter(email=self.data['email']).first():
             usr = User.objects.create_user(**self.data)
             self.data.update(model_to_dict(usr))
+
             return True
         return False
 
@@ -30,6 +31,17 @@ class GetUserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
             'phone', 'passport', 'email', 'confirmed', 'avatar'
+        )
+
+
+class ProtectedGetUserSerializer(serializers.ModelSerializer):
+    avatar = serializers.URLField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'name', 'surname',
+            'patronymic', 'role', 'avatar'
         )
 
 

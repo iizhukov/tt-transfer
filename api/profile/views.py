@@ -101,9 +101,14 @@ class UserDocumentsView(APIView):
         return Response({"documents": [doc.document.url for doc in docs] }, status=status.HTTP_200_OK)
 
     def post(self, request):
-        for file in request.data:
+        for file in request.FILES.getlist("documents"):
             doc = UserDocument(user=request.user)
-            serializer = DocumentSerializer(instance=doc, data={"document": request.data.get(file)})
+            serializer = DocumentSerializer(
+                instance=doc,
+                data={
+                    "document": file
+                }
+            )
 
             if serializer.is_valid():
                 serializer.save()

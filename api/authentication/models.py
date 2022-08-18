@@ -109,6 +109,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         if self.role in ("c", "d"):
             self.confirmed = True
+
         return super(User, self).save(*args, **kwargs)
 
 

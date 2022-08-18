@@ -13,13 +13,18 @@ class OrderView(APIView):
     serilizer_class = OrderSerializer
 
     def get(self, request):
+        if request.user.role != "c":
+            return Response(
+                {"detail": "Вы не клиент"},
+                status.HTTP_200_OK
+            )
+
         serializer = self.serilizer_class(
-            data=Order.objects.filter(
+            Order.objects.filter(
                 contractor=request.user.company
             ),
             many=True
         )
-        serializer.is_valid()
 
         return Response(
             serializer.data,
@@ -28,3 +33,4 @@ class OrderView(APIView):
 
     def post(self, request):
         pass
+    

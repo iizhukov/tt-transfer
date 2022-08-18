@@ -64,17 +64,22 @@ class City(models.Model):
         return None
 
 
-class Address(models.Model):
+class AbstractAddressModel(models.Model):
     city = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('Город'),
         blank=True, default=None,
     )
+    address = models.CharField(
+        _('Адрес'), max_length=256,
+        null=True, blank=True
+    )
     street = models.CharField(
         _('Улица'), max_length=128,
+        null=True, blank=True
     )
     number = models.CharField(
         _('Номер дома'), max_length=12,
-        default="1",
+        null=True, blank=True
     )
     coordinate = models.ForeignKey(
         "Coordinate", models.CASCADE,
@@ -83,6 +88,17 @@ class Address(models.Model):
     )
 
     class Meta:
+        abstract = True
+
+    def __str__(self) -> str:
+        return self.model_as_raw()
+
+    def model_as_raw(self, region=True):
+        return f"{self.city}, {self.street}, {self.number}"
+
+
+class Address(AbstractAddressModel):
+    class Meta:
         db_table = "address"
         verbose_name = "Адрес"
         verbose_name_plural = "Адреса"
@@ -90,8 +106,6 @@ class Address(models.Model):
     def __str__(self) -> str:
         return self.model_as_raw()
 
-    def model_as_raw(self, region=True):
-        return f"{self.city}, {self.street}, {self.number}"
 
     def save(self, *args, **kwargs):
         self.coordinate = self._get_coords_from_request()
@@ -110,6 +124,23 @@ class Address(models.Model):
             )[0]
 
         return None
+
+
+class Hub(AbstractAddressModel):
+    title = models.CharField(
+        _('Название'), max_length=256,
+    )
+    descrition = models.TextField(
+        _('Описание'), null=True, blank=True
+    )
+
+    class Meta:
+        db_table = "address_hub"
+        verbose_name = "Хаб"
+        verbose_name_plural = "Хабы"
+
+    def __str__(self) -> str:
+        return f"{self.city.city}: {self.title}"
 
 
 class Coordinate(models.Model):

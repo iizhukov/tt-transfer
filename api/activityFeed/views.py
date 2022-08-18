@@ -1,35 +1,28 @@
-from email.errors import NoBoundaryInMultipartDefect
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes as perm
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 from django.conf import settings
-import os
 
 from api.permissions import IsManagerOrAdminUser
 from .models import News, ImageModel, FileModel
-from api.authentication.models import User
 from .serializers import (
     NewsSerializer, NewsImageSerializer, NewsFileSerializer,
 )
 
 
 class NewsView(APIView):  
-    # permission_classes = (AllowAny, )
-  
-    def get(self, request, limit=None):
-        user = request.user
-        # user = User.objects.get(email="admin@adm.py")
+    serializer_class = NewsSerializer
 
+    def get(self, request):
         news = News.objects.filter(
             category__in=set((
-                get_category_by_role(user.role),
+                get_category_by_role(request.user.role),
                 "for_all"
             ))
-        ).order_by("-date")[:limit]
+        ).order_by("-date")
 
         serializered_news = NewsSerializer(data=news, many=True)
         serializered_news.is_valid()
@@ -50,13 +43,15 @@ class NewsView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        user = request.user
-        # user = User.objects.get(email="admin@adm.py")
-
-        if user.role not in ("a", "m"):
+        if request.user.role not in ("a", "m"):
             return Response({ "detail": "Недостаточно прав" }, status=status.HTTP_400_BAD_REQUEST)
 
-        serializered_news = NewsSerializer(data=request.data)
+        serializered_news = NewsSerializer(
+            data={
+                **request.data,
+                "author": request.data.get("author") or request.user,
+            }
+        )
 
         if serializered_news.is_valid():
             serializered_news.save()
@@ -69,29 +64,30 @@ class NewsImageView(APIView):
     serializer_class = NewsImageSerializer
     parser_classes = (MultiPartParser, FormParser)
 
-    def get(self, request):
-        if "id" not in request.data:
-            return Response({"detail": "Где id?"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        id = request.data.get("id")
-        news = News.objects.filter(id=id).first()
-
-        if not news:
-            return Response({"detail": "Нет такой новости"}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, id):
+        news = get_object_or_404(
+            News,
+            id=id
+        )
 
         return Response(
             {"images": NewsImageView._get_image_by_news(news=news)},
             status=status.HTTP_200_OK
         )
 
-    def post(self, request):
-        news = News.objects.get(id=request.data.get("news"))
+    def post(self, request, id):
+        news = get_object_or_404(
+            News,
+            id=id
+        )
 
-        for image in request.data:
+        for image in request.FILES.getlist("images"):
             news_image = ImageModel(news=news)
             serializer = NewsImageSerializer(
                 instance=news_image,
-                data={"image": request.data.get(image)}
+                data={
+                    "image": image
+                }
             )
 
             if serializer.is_valid():
@@ -116,29 +112,31 @@ class NewsFileView(APIView):
     serializer_class = NewsFileSerializer
     parser_classes = (MultiPartParser, FormParser)
 
-    def get(self, request):
-        if "id" not in request.data:
-            return Response({"detail": "Где id?"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        id = request.data.get("id")
-        news = News.objects.filter(id=id).first()
-
-        if not news:
-            return Response({"detail": "Нет такой новости"}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, id):
+        news = get_object_or_404(
+            News,
+            id=id
+        )
 
         return Response(
             {"files": NewsFileView._get_files_by_news(news=news)},
             status=status.HTTP_200_OK
         )
 
-    def post(self, request):
-        news = News.objects.get(id=request.data.get("news"))
+    def post(self, request, id):
+        news = get_object_or_404(
+            News,
+            id=id
+        )
 
-        for file in request.data:
+        for file in request.FILES.getlist("files"):
             news_file = FileModel(news=news)
-            serializer = NewsImageSerializer(
+
+            serializer = NewsFileSerializer(
                 instance=news_file,
-                data={"file": request.data.get(file)}
+                data={
+                    "file": file
+                }
             )
 
             if serializer.is_valid():

@@ -1,15 +1,19 @@
-from django.forms import model_to_dict
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from shapely.geometry import Point, Polygon
+from django.shortcuts import get_object_or_404
 
-from .models import Address, City, CityZone, Coordinate
+from .models import (
+    Address, City, CityZone,
+    Coordinate, Hub
+)
 from .serializers import (
     CitySerializer, AddressSerializer,
     AddAddressSerializer, CityZoneSerializer,
-    GetZoneByCoordsSerializer, GetZoneByAddressSerializer
+    GetZoneByCoordsSerializer, GetZoneByAddressSerializer,
+    HubSerializer
 )
 
 
@@ -113,7 +117,8 @@ class ZonesView(APIView):
         city_ = request.query_params.get("city")
         region_ = request.query_params.get("region")
 
-        city = City.objects.get(
+        city = get_object_or_404(
+            City,
             region=region_,
             city=city_
         )
@@ -140,7 +145,8 @@ class ZonesView(APIView):
         )
 
     def post(self, request):
-        city = City.objects.get(
+        city = get_object_or_404(
+            City,
             region=request.data.get("region"),
             city=request.data.get("city")
         )
@@ -179,13 +185,7 @@ class EditZoneView(APIView):
     serializer_class = CityZoneSerializer
 
     def get(self, reqeust, id: int):
-        zone = CityZone.objects.filter(id=id).first()
-
-        if not zone:
-            return Response(
-                {"detail": "Not Found"},
-                status.HTTP_400_BAD_REQUEST
-            )
+        zone = get_object_or_404(CityZone, id=id)
 
         serializer = self.serializer_class(
             instance=zone
@@ -197,15 +197,10 @@ class EditZoneView(APIView):
         )
 
     def put(self, request, id):
-        zone = CityZone.objects.filter(
+        zone = get_object_or_404(
+            CityZone,
             pk=id
-        ).first()
-
-        if not zone:
-            return Response(
-                {"detail": "Такой зоны нет"},
-                status.HTTP_400_BAD_REQUEST
-            )
+        )
 
         zone.color = request.data.get("color") or zone.color
         new_coords = request.data.get("coordinates")[0]
@@ -237,13 +232,7 @@ class EditZoneView(APIView):
         )
 
     def delete(self, request, id: int):
-        zone = CityZone.objects.filter(id=id).first()
-
-        if not zone:
-            return Response(
-                {"detail": "Not Found"},
-                status.HTTP_400_BAD_REQUEST
-            )
+        zone = get_object_or_404(CityZone, id=id)
 
         zone.delete()
 
@@ -268,21 +257,15 @@ class GetZoneByCoordsView(APIView):
                 status.HTTP_200_OK
             )
 
-        city = City.objects.filter(
+        city = get_object_or_404(
+            City,
             region=serializer.data.get("region"),
             city=serializer.data.get("city")
-        ).first()
+        )
     
         zones = CityZone.objects.filter(
             city=city
         )
-
-
-        if not city or not zones:
-            return Response(
-                {"detail": "Город не отзонирован"},
-                status.HTTP_400_BAD_REQUEST
-            )
 
         address_point = Point(
             serializer.data.get("address_latitude"),
@@ -340,5 +323,78 @@ class GetCityCenter(APIView):
                 "latitude": latitude,
                 "longitude": longitude
             },
+            status.HTTP_200_OK
+        )
+
+
+class HubView(APIView):
+    serializer_class = HubSerializer
+
+    def get(self, request):
+        region_ = request.query_params.get("region")
+        city_ = request.query_params.get("city")
+
+        city = get_object_or_404(
+            City,
+            region=region_,
+            city=city_
+        )
+
+        hubs = Hub.objects.filter(
+            city=city
+        )
+
+        serializer = self.serializer_class(
+            instance=hubs,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        region_ = request.data.get("region_")
+        city_ = request.data.get("city_")
+
+        lat, lon = request.data.get("coordinates")
+
+        if not region_ or not city_:
+            return Response(
+                {"detail": "city or region is empty"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        if not lat or not lon:
+            return Response(
+                {"detail": "coordinates is empty"},
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        city = City.objects.get_or_create(
+            region=region_,
+            city=city_
+        )[0]
+
+        coordinates = Coordinate.objects.get_or_create(
+            latitude=lat,
+            longitude=lon
+        )[0]
+
+        serializer = self.serializer_class(
+            data=request.data,
+        )
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer.save(city=city, coordinate=coordinates)
+
+        return Response(
+            serializer.data,
             status.HTTP_200_OK
         )
