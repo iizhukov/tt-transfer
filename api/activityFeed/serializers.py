@@ -14,6 +14,14 @@ class NewsSerializer(serializers.ModelSerializer):
         depth = 2
 
 
+class CreateNewsSerializer(serializers.ModelSerializer):
+    date = serializers.ReadOnlyField()
+
+    class Meta:
+        model = News
+        fields = "__all__"
+
+
 class NewsImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageModel

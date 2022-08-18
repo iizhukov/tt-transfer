@@ -4,12 +4,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from django.forms import model_to_dict
 from django.conf import settings
 
 from api.permissions import IsManagerOrAdminUser
 from .models import News, ImageModel, FileModel
 from .serializers import (
     NewsSerializer, NewsImageSerializer, NewsFileSerializer,
+    CreateNewsSerializer
 )
 
 
@@ -46,10 +48,10 @@ class NewsView(APIView):
         if request.user.role not in ("a", "m"):
             return Response({ "detail": "Недостаточно прав" }, status=status.HTTP_400_BAD_REQUEST)
 
-        serializered_news = NewsSerializer(
+        serializered_news = CreateNewsSerializer(
             data={
                 **request.data,
-                "author": request.data.get("author") or request.user,
+                "author": request.data.get("author") or request.user.id,
             }
         )
 
@@ -57,7 +59,10 @@ class NewsView(APIView):
             serializered_news.save()
             return Response(serializered_news.data, status=status.HTTP_201_CREATED)
         
-        return Response({ "detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializered_news.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class NewsImageView(APIView):
