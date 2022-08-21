@@ -17,8 +17,8 @@
     function init () {
         let lat = "{{ lat|safe }}", lon = "{{ lon|safe }}";
 
-        lat = lat.replace("['", "").replace("'']", "").split("', '").map(parseFloat)
-        lon = lon.replace("['", "").replace("'']", "").split("', '").map(parseFloat)
+        lat = lat.replace("['", "").replace("']", "").split("', '").map(parseFloat)
+        lon = lon.replace("['", "").replace("']", "").split("', '").map(parseFloat)
 
         // alert(`(${lat1}, ${lon1}) (${lat2}, ${lon1})`)
         // alert("{{ lat }}")

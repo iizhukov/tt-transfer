@@ -21,7 +21,10 @@ def zones(request):
         request,
         "zones.html",
         context={
-            "city": city
+            "city": city,
+            "lat": request.GET.getlist("lat"),
+            "lon": request.GET.getlist("lon"),
+            "title": request.GET.getlist("title")
         }
     )
 

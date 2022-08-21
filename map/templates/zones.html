@@ -16,11 +16,18 @@
 	ymaps.ready(init);
 
     function init() {
-        let lat = +"{{ city.center.latitude }}".replace(",", ".");
-        let log = +"{{ city.center.longitude }}".replace(",", ".");
+        let city_lat = +"{{ city.center.latitude }}".replace(",", ".");
+        let city_lon = +"{{ city.center.longitude }}".replace(",", ".");
+
+
+        let lat = "{{ lat|safe }}", lon = "{{ lon|safe }}", title = "{{ title|safe }}";
+
+        lat = lat.replace("['", "").replace("']", "").split("', '").map(parseFloat)
+        lon = lon.replace("['", "").replace("']", "").split("', '").map(parseFloat)
+        title = title.replace("['", "").replace("']", "").split("', '")
 
         var map = new ymaps.Map("map", {
-            center: [lat, log],
+            center: [city_lat, city_lon],
             zoom: 12,
             controls: [
                 "zoomControl",
@@ -81,6 +88,19 @@
                 map.behaviors.disable('scrollZoom'); 
 
                 map.geoObjects.add(zone);
+
+  
+                
+                for (let i = 0; i < lat.length; ++i) {
+                    map.geoObjects.add(
+                        new ymaps.Placemark([lat[i], lon[i]], {
+                            balloonContent: title[i]
+                        }, {
+                            preset: 'islands#circleIcon',
+                            iconColor: '#8DC73F'
+                        })
+                    )
+                }
             });
         })
     }
