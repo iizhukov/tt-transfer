@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from django.forms import model_to_dict
 from django.conf import settings
 
@@ -15,7 +16,12 @@ from .serializers import (
 )
 
 
-class NewsView(APIView):  
+class ResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+
+
+class NewsView(APIView, ResultsSetPagination):  
     serializer_class = NewsSerializer
 
     def get(self, request):
@@ -41,6 +47,10 @@ class NewsView(APIView):
                 "files": files
             }
             data.append(news_data)
+
+        results = self.paginate_queryset(data, request, view=self)
+        print(results)
+        return self.get_paginated_response(results)
 
         return Response(data, status=status.HTTP_200_OK)
 

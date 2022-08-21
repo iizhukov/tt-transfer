@@ -77,11 +77,8 @@ class Order(models.Model):
 
     # manager = models.ForeignKey()
 
-    date = models.DateField(
-        _('Дата заказа'), default=timezone.now
-    )
-    time = models.TimeField(
-        _('Время заказа'), default=timezone.now
+    datetime = models.DateTimeField(
+        _('Дата и время заказа'), default=timezone.now
     )
     price = models.IntegerField(
         _('Цена'), blank=True, default=None
