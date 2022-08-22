@@ -26,6 +26,8 @@
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
 
+/.idea/
+
 #tt_transfer django
 /tt_transfer/__pycache__/
 

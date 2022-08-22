@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from api.address.models import CityZone, City
 from api.cars.models import CAR_CLASSES
+from api.exceptions import TariffNotSpecifiedException
 
 
 TARIFF_TYPE = (
@@ -120,3 +121,35 @@ class IntercityTariff(models.Model):
 
     def __str__(self) -> str:
         return f"{self.from_city.city} -> {self.to_city.city}"
+
+
+class Tariff(models.Model):
+    intracity_tariff = models.ForeignKey(
+        IntracityTariff, models.CASCADE,
+        verbose_name=_('Внутригородской тариф'),
+        null=True, blank=True
+    )
+    intercity_tariff = models.ForeignKey(
+        IntercityTariff, models.CASCADE,
+        verbose_name=_('межгородской тариф'),
+        null=True, blank=True
+    )
+
+    class Meta:
+        db_table = "tariff"
+        verbose_name = "Тариф"
+        verbose_name_plural = "Тарифы"
+
+    def __str__(self) -> str:
+        return self.tariff
+
+    @property
+    def tariff(self):
+        if self.intercity_tariff_id is not None:
+            return self.intercity_tariff
+        if self.intracity_tariff_id is not None:
+            return self.intracity_tariff
+
+        raise TariffNotSpecifiedException(
+            "Не указан междугородской или внутригородской тариф"
+        )

@@ -1,0 +1,2 @@
+class TariffNotSpecifiedException(Exception):
+    pass

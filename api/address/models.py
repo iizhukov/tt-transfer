@@ -69,18 +69,6 @@ class AbstractAddressModel(models.Model):
         City, models.CASCADE, verbose_name=_('Город'),
         blank=True, default=None,
     )
-    address = models.CharField(
-        _('Адрес'), max_length=256,
-        null=True, blank=True
-    )
-    street = models.CharField(
-        _('Улица'), max_length=128,
-        null=True, blank=True
-    )
-    number = models.CharField(
-        _('Номер дома'), max_length=12,
-        null=True, blank=True
-    )
     coordinate = models.ForeignKey(
         "Coordinate", models.CASCADE,
         verbose_name=_('Координаты'),
@@ -98,6 +86,15 @@ class AbstractAddressModel(models.Model):
 
 
 class Address(AbstractAddressModel):
+    street = models.CharField(
+        _('Улица'), max_length=128,
+        null=True, blank=True
+    )
+    number = models.CharField(
+        _('Номер дома'), max_length=12,
+        null=True, blank=True
+    )
+
     class Meta:
         db_table = "address"
         verbose_name = "Адрес"

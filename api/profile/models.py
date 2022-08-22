@@ -39,11 +39,13 @@ class Company(models.Model):
     name = models.CharField(
         _('Название'), max_length=128
     )
-    location = models.ForeignKey(
-        Address, models.CASCADE, verbose_name=_('Адрес')
+    address = models.ForeignKey(
+        Address, models.CASCADE, verbose_name=_('Адрес'),
+        null=True, blank=True
     )
-    user = models.OneToOneField(
-        User, models.CASCADE, verbose_name=_('Ответственный')
+    user = models.ForeignKey(
+        User, models.CASCADE, verbose_name=_('Ответственный'),
+        null=True, blank=True
     )
     financial_turnover = models.IntegerField(
         _('Финансовый оборот'), default=0,
@@ -64,6 +66,10 @@ class Company(models.Model):
     gen_director_patronymic = models.CharField(
         _('Отчество Ген директора'), max_length=64,
         blank=True, null=True,
+    )
+
+    confirmed = models.BooleanField(
+        _('Подтвержден'), default=False,
     )
 
     class Meta:

@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from api.address.models import Address, City
 from api.profile.models import Company, Manager
-from api.tariffs.models import IntracityTariff, IntercityTariff
+from api.tariffs.models import Tariff
 from api.cars.models import CAR_CLASSES
 
 
@@ -30,12 +30,8 @@ class OrderDetailModel(models.Model):
         _('Класс авто'), choices=CAR_CLASSES, max_length=32
     )
 
-    intercity_tariff = models.ForeignKey(
-        IntercityTariff, models.CASCADE, verbose_name=_('Межгородской тариф тариф'),
-        null=True, blank=True, default=None
-    )
-    intracity_tariff = models.ForeignKey(
-        IntracityTariff, models.CASCADE, verbose_name=_('Внутригородской тариф'),
+    tariff = models.ForeignKey(
+        Tariff, models.CASCADE, verbose_name=_('тариф'),
         null=True, blank=True, default=None
     )
 

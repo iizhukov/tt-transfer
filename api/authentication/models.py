@@ -1,10 +1,8 @@
-from email.policy import default
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from django.conf import settings
-from django.utils.deconstruct import deconstructible
 import os
 
 from .manager import UserManager
@@ -35,7 +33,7 @@ def _document_path(instance, filename):
 
 
 def _path(instance, filename):
-    format = filename.split(".")[-1]
+    format_ = filename.split(".")[-1]
     path = os.path.join("/avatars/", instance.email)
 
     if os.path.exists(path):
@@ -43,9 +41,9 @@ def _path(instance, filename):
             if "avatar" in file:
                 os.remove(os.path.join(path, file))
 
-    print(os.path.join(path, f"avatar.{format}"))
+    print(os.path.join(path, f"avatar.{format_}"))
 
-    return os.path.join(path, f"avatar.{format}")
+    return os.path.join(path, f"avatar.{format_}")
 
 
 ROLES = (('a', 'admin'), ('m', 'manager'), ('d', 'driver'), ('c', 'client'))
@@ -86,7 +84,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     is_staff = models.BooleanField(_("Сотрудник"), default=False)
     is_active = models.BooleanField(
-        _("Активный"), default=True, help_text=_("Включенно, когда акаунт не в бане")
+        _("Активный"), default=True, help_text=_("Включено, когда аккаунт не в бане")
     )
     is_superuser = models.BooleanField(_("Администратор"), default=False)
     date_joined = models.DateTimeField(

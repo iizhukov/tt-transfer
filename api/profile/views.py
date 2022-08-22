@@ -1,12 +1,16 @@
+from re import L
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
 
+from .models import Company
 from api.authentication.models import User, UserDocument
+from api.address.models import City, Address
 from api.authentication.serializers import (
     GetUserSerializer, UserSerializer
 )
@@ -134,23 +138,17 @@ class UserListView(ListAPIView):
     serializer_class = UserSerializer
 
 
-class ContractorView(APIView):
+class CompanyView(APIView):
     serializer_class = CompanySerializer
     # permission_classes = (AllowAny, )
 
     def get(self, request):
-        user = request.user
-    
-        if not getattr(user, "company", False):
-            return Response(
-                {},
-                status=status.HTTP_204_NO_CONTENT
-            )
-
         serializer = self.serializer_class(
-            data=model_to_dict(user.company)
+            Company.objects.filter(
+                user=request.user
+            ),
+            many=True
         )
-        serializer.is_valid()
 
         return Response(
             serializer.data,
@@ -158,19 +156,85 @@ class ContractorView(APIView):
         )
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(
+            data=request.data
+        )
+
+        city, _ = City.objects.get_or_create(
+            region=request.data.get("region"),
+            city=request.data.get("city")
+        )
+    
+        address, _ = Address.objects.get_or_create(
+            city=city,
+            street=request.data.get("street"),
+            number=request.data.get("number")
+        )
 
         if not serializer.is_valid():
             return Response(
-                {
-                    "detail": "Невалидные данные",
-                },
+                serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        serializer.save()
+        serializer.save(
+            user=request.user,
+            address=address
+        )
 
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+    def delete(self, request, id):
+        company = get_object_or_404(
+            Company,
+            id=id,
+            user=request.user
+        )
+
+        company.delete()
+
+        return Response(
+            {"detail": "deleted"},
+            status.HTTP_200_OK
+        )
+
+    def put(self, request, id):
+        company = get_object_or_404(
+            Company,
+            id=id
+        )
+
+        city, _ = City.objects.get_or_create(
+            region=request.data.get("region"),
+            city=request.data.get("city")
+        )
+
+        address, _ = Address.objects.get_or_create(
+            city=city,
+            street=request.data.get("street"),
+            number=request.data.get("number")
+        )
+
+        serializer = self.serializer_class(
+            company,
+            request.data
+        )
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer.save(
+            address=address
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+ 

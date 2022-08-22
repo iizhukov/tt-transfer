@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.forms.models import model_to_dict
 
 from api.authentication.models import User, UserDocument
+from api.authentication.serializers import ProtectedGetUserSerializer
 from api.profile.models import Company
 
 
@@ -34,6 +35,9 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer(read_only=True)
+
     class Meta:
         model = Company
         fields = "__all__"
+        depth = 2
