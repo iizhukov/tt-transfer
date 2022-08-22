@@ -89,18 +89,41 @@
 
                 map.geoObjects.add(zone);
 
-  
                 
-                for (let i = 0; i < lat.length; ++i) {
-                    map.geoObjects.add(
-                        new ymaps.Placemark([lat[i], lon[i]], {
-                            balloonContent: title[i]
-                        }, {
-                            preset: 'islands#circleIcon',
-                            iconColor: '#8DC73F'
-                        })
-                    )
-                }
+                // for (let i = 0; i < lat.length; ++i) {
+                //     map.geoObjects.add(
+                //         new ymaps.Placemark([lat[i], lon[i]], {
+                //             balloonContent: `<strong>${title[i]}</strong>`
+                //         }, {
+                //             preset: 'islands#circleIcon',
+                //             iconColor: 'orange'
+                //         })
+                //     )
+                // }
+                
+                fetch(
+                    `http://localhost:8000/api/address/hub/?region={{ city.region }}&city={{ city.city }}`
+                ).then((response) => {
+                    return response.json()
+                }).then((hubs) => {
+                    console.log(hubs)
+    
+                    hubs.forEach((hub, index) => {
+
+                        map.geoObjects.add(
+                            new ymaps.Placemark([hub.coordinate.latitude, hub.coordinate.longitude], {
+                                balloonContentHeader: hub.title,
+                                balloonContentBody: hub.description,
+                            }, {
+                                preset: 'islands#circleIcon',
+                                iconColor: 'orange'
+                            })
+                        )
+
+                    })
+
+                })
+
             });
         })
     }

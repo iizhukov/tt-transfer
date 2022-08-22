@@ -40,10 +40,12 @@ INSTALLED_APPS = [
     'api.authentication',
     'api.address',
     'api.activityFeed',
+    'api.adminInterface',
     'api.cars',
     'api.drivers',
     'api.orders',
     'api.profile',
+    'api.smartFilter',
     'api.tariffs',
 ]
 

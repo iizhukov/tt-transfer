@@ -127,7 +127,7 @@ class Hub(AbstractAddressModel):
     title = models.CharField(
         _('Название'), max_length=256,
     )
-    descrition = models.TextField(
+    description = models.TextField(
         _('Описание'), null=True, blank=True
     )
 

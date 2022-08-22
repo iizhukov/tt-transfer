@@ -50,7 +50,7 @@ class HubSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Hub
         fields = "__all__"
-        depth = 1
+        depth = 2
 
 
 class GetZoneByAddressSerializer(serializers.Serializer):

@@ -329,6 +329,7 @@ class GetCityCenter(APIView):
 
 class HubView(APIView):
     serializer_class = HubSerializer
+    permission_classes = (AllowAny, )
 
     def get(self, request):
         region_ = request.query_params.get("region")
@@ -355,8 +356,8 @@ class HubView(APIView):
         )
 
     def post(self, request):
-        region_ = request.data.get("region_")
-        city_ = request.data.get("city_")
+        region_ = request.data.get("region")
+        city_ = request.data.get("city")
 
         lat, lon = request.data.get("coordinates")
 

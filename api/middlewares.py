@@ -35,7 +35,6 @@ class HaveTokenToMediaMiddleware:
                 )
 
             docs = UserDocument.objects.filter(user=request.user).values_list("document")
-            print(docs)
             for i in docs:
                 if "/media/" + i[0] in request.path:
                     break

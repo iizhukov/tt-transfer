@@ -52,7 +52,7 @@ class CreateUserView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        return Response({"detail": "Некорректные данные"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializered_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def _check_email(email):

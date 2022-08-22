@@ -5,7 +5,7 @@ from django.forms.models import model_to_dict
 
 from api.authentication.models import User, UserDocument
 from api.authentication.serializers import ProtectedGetUserSerializer
-from api.profile.models import Company
+from api.profile.models import Company, Manager, Client, Driver, Admin
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -41,3 +41,39 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = "__all__"
         depth = 2
+
+
+class ManagerSerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer()
+
+    class Meta:
+        model = Manager
+        fields = "__all__"
+        depth = 1
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer()
+
+    class Meta:
+        model = Client
+        fields = "__all__"
+        depth = 1
+
+
+class DriverSerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer()
+
+    class Meta:
+        model = Driver
+        fields = "__all__"
+        depth = 1
+
+
+class AdminSerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer()
+
+    class Meta:
+        model = Admin
+        fields = "__all__"
+        depth = 1
