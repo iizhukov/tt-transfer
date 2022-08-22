@@ -45,7 +45,7 @@
 /api/drivers/__pycache__/
 /api/orders/__pycache__/
 /api/profile/__pycache__/
-/api/smartInterface/__pycache__/
+/api/smartFilter/__pycache__/
 /api/tariffs/__pycache__/
 
 #api migrations
@@ -66,7 +66,7 @@ api/cars/migrations/__pycache__
 api/drivers/migrations/__pycache__
 api/orders/migrations/__pycache__
 api/profile/migrations/__pycache__
-api/smartInterface/migrations/__pycache__
+api/smartFilter/migrations/__pycache__
 api/tariffs/migrations/__pycache__
 
 #except
@@ -78,7 +78,7 @@ api/tariffs/migrations/__pycache__
 !api/drivers/migrations/__init__.py
 !api/orders/migrations/__init__.py
 !api/profile/migrations/__init__.py
-!api/smartInterface/migrations/__init__.py
+!api/smartFilter/migrations/__init__.py
 !api/tariffs/migrations/__init__.py
 
 #virtualenv
