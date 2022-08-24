@@ -1,3 +1,4 @@
+from typing import List
 from urllib import response
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,7 +14,7 @@ from .models import (
 from .serializers import (
     CitySerializer, AddressSerializer,
     AddAddressSerializer, CityZoneSerializer,
-    GetZoneByCoordsSerializer, GetZoneByAddressSerializer,
+    GetZoneByCoordsSerializer,
     HubSerializer, HubZoneSerializer
 )
 
@@ -296,13 +297,6 @@ class GetZoneByCoordsView(APIView):
         )
 
 
-class GetZoneByAddressView(APIView):
-    serializer_class = GetZoneByAddressSerializer
-
-    def post(self, request):
-        pass
-
-
 class GetCityCenter(APIView):
     def get(self, request):
         region_ = request.query_params.get("region")
@@ -409,7 +403,7 @@ class HubView(APIView):
 class HubZoneView(APIView):
     serializer_class = HubZoneSerializer
 
-    def get(self, request, id):
+    def get(self, request, hub_id):
         hub = get_object_or_404(
             Hub,
             id=id
@@ -452,10 +446,10 @@ class HubZoneView(APIView):
 class EditHubZoneView(APIView):
     serializer_class = HubZoneSerializer
 
-    def put(self, request, id):
+    def put(self, request, hub_id):
         zone = get_object_or_404(
             HubZone,
-            id=id
+            id=hub_id
         )
 
         zone.color = request.data.get("color")
@@ -470,4 +464,45 @@ class EditHubZoneView(APIView):
         return Response(
             serializer.data,
             status.HTTP_200_OK
+        )
+
+
+class GetHubZoneByCoordsAndHubView(APIView):
+    def get(self, request):
+        latitude = float(request.query_params.get("latitude").replace(",", "."))
+        longitude = float(request.query_params.get("longitude").replace(",", "."))
+
+        hub = get_object_or_404(
+            Hub,
+            id=request.qeury_params.get("hub_id")
+        )
+        zones: List[HubZone] = HubZone.objects.filter(
+            hub=hub
+        )
+
+        coords_point = Point(
+            latitude,
+            longitude
+        )
+
+        for zone in zones:
+            zone_polygon = Polygon(
+                zone.get_coordinates_as_list()
+            )
+
+            if zone_polygon.contains(coords_point):
+                zone_serializer = CityZoneSerializer(
+                    instance=zone
+                )
+
+                return Response(
+                    zone_serializer.data,
+                    status.HTTP_200_OK
+                )
+
+        return Response(
+            {
+                "detail": "Zone not found"
+            },
+            status.HTTP_400_BAD_REQUEST
         )

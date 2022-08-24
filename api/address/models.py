@@ -1,3 +1,4 @@
+from typing import List
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
@@ -195,13 +196,13 @@ class CityZone(models.Model):
 
 
 class HubZone(models.Model):
-    hub = models.ForeignKey(
+    hub: Hub = models.ForeignKey(
         Hub, models.CASCADE, verbose_name=_('Хаб')
     )
-    color = models.CharField(
+    color: str = models.CharField(
         verbose_name=_('Цвет'), choices=ZONE_COLORS, max_length=12
     )
-    coordinates = models.ManyToManyField(
+    coordinates: List[Coordinate] = models.ManyToManyField(
         Coordinate,
     )
 
@@ -225,7 +226,6 @@ class HubZone(models.Model):
                     longitude=longitude
                 )[0]
             )
-
 
     def get_coordinates_as_list(self):
         coords = []

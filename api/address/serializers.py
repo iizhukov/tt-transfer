@@ -58,7 +58,3 @@ class HubZoneSerializer(serializers.ModelSerializer):
         model = models.HubZone
         fields = "__all__"
         depth = 2
-
-
-class GetZoneByAddressSerializer(serializers.Serializer):
-    pass
