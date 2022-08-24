@@ -58,3 +58,10 @@ class HubZoneSerializer(serializers.ModelSerializer):
         model = models.HubZone
         fields = "__all__"
         depth = 2
+
+
+class GlobalAddressSerializer(serializers.Serializer):
+    class Meta:
+        model = models.GlobalAddress
+        fields = "__all__"
+        depth = 1

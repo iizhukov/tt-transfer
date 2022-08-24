@@ -141,6 +141,13 @@ class Hub(AbstractAddressModel):
         return f"{self.city.city}: {self.title}"
 
 
+class GlobalAddress(Hub):
+    class Meta:
+        db_table = "address_globaladdress"
+        verbose_name = "Глобальный адрес"
+        verbose_name_plural = "Глобальные адреса"
+
+
 class Coordinate(models.Model):
     latitude = models.FloatField(
         _('Широта')

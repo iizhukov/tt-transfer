@@ -1,5 +1,5 @@
 from typing import List
-from urllib import response
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -9,20 +9,22 @@ from django.shortcuts import get_object_or_404
 
 from .models import (
     Address, City, CityZone,
-    Coordinate, Hub, HubZone
+    Coordinate, Hub, HubZone,
+    GlobalAddress
 )
 from .serializers import (
     CitySerializer, AddressSerializer,
     AddAddressSerializer, CityZoneSerializer,
     GetZoneByCoordsSerializer,
-    HubSerializer, HubZoneSerializer
+    HubSerializer, HubZoneSerializer,
+    GlobalAddressSerializer
 )
 
 
 class CityView(APIView):
     serializer_class = CitySerializer
 
-    def get(self, request):
+    def get(self, request: Request):
         serializer = self.serializer_class(
             data=City.objects.all(),
             many=True,
@@ -34,7 +36,7 @@ class CityView(APIView):
             status=status.HTTP_200_OK
         )
 
-    def post(self, request):
+    def post(self, request: Request):
         serializer = self.serializer_class(
             data=request.data
         )
@@ -63,7 +65,7 @@ class CityView(APIView):
 class AddressView(APIView):
     serializer_class = AddressSerializer
 
-    def get(self, request):
+    def get(self, request: Request):
         serializer = self.serializer_class(
             data=Address.objects.all(),
             many=True,
@@ -79,7 +81,7 @@ class AddressView(APIView):
 class AddAddressView(APIView):
     serializer_class = AddAddressSerializer
 
-    def post(self, request):
+    def post(self, request: Request):
         if not self.serializer_class(data=request.data).is_valid():
             return Response(
                 {"detail": "Некорректные данные"},
@@ -115,7 +117,7 @@ class ZonesView(APIView):
     serializer_class = CityZoneSerializer
     permission_classes = (AllowAny, )
     
-    def get(self, request):
+    def get(self, request: Request):
         city_ = request.query_params.get("city")
         region_ = request.query_params.get("region")
 
@@ -146,7 +148,7 @@ class ZonesView(APIView):
             status.HTTP_200_OK
         )
 
-    def post(self, request):
+    def post(self, request: Request):
         city = get_object_or_404(
             City,
             region=request.data.get("region"),
@@ -186,7 +188,7 @@ class ZonesView(APIView):
 class EditZoneView(APIView):
     serializer_class = CityZoneSerializer
 
-    def get(self, reqeust, id: int):
+    def get(self, reqeust: Request, id: int):
         zone = get_object_or_404(CityZone, id=id)
 
         serializer = self.serializer_class(
@@ -198,7 +200,7 @@ class EditZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def put(self, request, id):
+    def put(self, request: Request, id: int):
         zone = get_object_or_404(
             CityZone,
             pk=id
@@ -230,7 +232,7 @@ class EditZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def delete(self, request, id: int):
+    def delete(self, request: Request, id: int):
         zone = get_object_or_404(CityZone, id=id)
 
         zone.delete()
@@ -244,7 +246,7 @@ class EditZoneView(APIView):
 class GetZoneByCoordsView(APIView):
     serializer_class = GetZoneByCoordsSerializer
 
-    def post(self, request):
+    def post(self, request: Request):
         serializer = self.serializer_class(
             data=request.data
         )
@@ -298,7 +300,7 @@ class GetZoneByCoordsView(APIView):
 
 
 class GetCityCenter(APIView):
-    def get(self, request):
+    def get(self, request: Request):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
@@ -323,7 +325,7 @@ class HubView(APIView):
     serializer_class = HubSerializer
     permission_classes = (AllowAny, )
 
-    def get(self, request):
+    def get(self, request: Request):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
@@ -354,7 +356,7 @@ class HubView(APIView):
             status.HTTP_200_OK
         )
 
-    def post(self, request):
+    def post(self, request: Request):
         region_ = request.data.get("region")
         city_ = request.data.get("city")
 
@@ -403,10 +405,10 @@ class HubView(APIView):
 class HubZoneView(APIView):
     serializer_class = HubZoneSerializer
 
-    def get(self, request, hub_id):
+    def get(self, request: Request, hub_id: int):
         hub = get_object_or_404(
             Hub,
-            id=id
+            id=hub_id
         )
 
         serializer = self.serializer_class(
@@ -421,10 +423,10 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def post(self, request, id):
+    def post(self, request: Request, hub_id: int):
         hub = get_object_or_404(
             Hub,
-            id=id
+            id=hub_id
         )
 
         zone = HubZone(
@@ -446,7 +448,7 @@ class HubZoneView(APIView):
 class EditHubZoneView(APIView):
     serializer_class = HubZoneSerializer
 
-    def put(self, request, hub_id):
+    def put(self, request: Request, hub_id: int):
         zone = get_object_or_404(
             HubZone,
             id=hub_id
@@ -468,7 +470,7 @@ class EditHubZoneView(APIView):
 
 
 class GetHubZoneByCoordsAndHubView(APIView):
-    def get(self, request):
+    def get(self, request: Request):
         latitude = float(request.query_params.get("latitude").replace(",", "."))
         longitude = float(request.query_params.get("longitude").replace(",", "."))
 
@@ -506,3 +508,12 @@ class GetHubZoneByCoordsAndHubView(APIView):
             },
             status.HTTP_400_BAD_REQUEST
         )
+
+
+class GlobalAddressView(APIView):
+    serializer_class = GlobalAddressSerializer
+
+    def get(self, request: Request):
+        region = request.query_params.get("region")
+        city = request.query_params.get("city")
+
