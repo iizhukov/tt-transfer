@@ -1,4 +1,5 @@
 from typing import List
+from django.forms import model_to_dict
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -411,15 +412,18 @@ class HubZoneView(APIView):
             id=hub_id
         )
 
-        serializer = self.serializer_class(
-            HubZone.objects.filter(
-                hub=hub
-            ),
-            many=True
+        zones: List[HubZone] = HubZone.objects.filter(
+            hub=hub
         )
 
+        response = []
+
+        for ind, zone in enumerate(zones):
+            response.append(model_to_dict(zone))
+            response[ind]["coordinates"] = zone.get_coordinates_as_list()
+
         return Response(
-            serializer.data,
+            response,
             status.HTTP_200_OK
         )
 
