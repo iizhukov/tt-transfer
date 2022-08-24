@@ -1,3 +1,4 @@
+from urllib import response
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -7,13 +8,13 @@ from django.shortcuts import get_object_or_404
 
 from .models import (
     Address, City, CityZone,
-    Coordinate, Hub
+    Coordinate, Hub, HubZone
 )
 from .serializers import (
     CitySerializer, AddressSerializer,
     AddAddressSerializer, CityZoneSerializer,
     GetZoneByCoordsSerializer, GetZoneByAddressSerializer,
-    HubSerializer
+    HubSerializer, HubZoneSerializer
 )
 
 
@@ -210,13 +211,10 @@ class EditZoneView(APIView):
 
             for latitude, longitude in new_coords:
                 print(latitude, longitude)
-                coords, created = Coordinate.objects.get_or_create(
+                coords, _ = Coordinate.objects.get_or_create(
                     latitude=latitude,
                     longitude=longitude
                 )
-
-                if created:
-                    coords.save()
 
                 zone.coordinates.add(coords)
 
@@ -335,23 +333,30 @@ class HubView(APIView):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
-        city = get_object_or_404(
-            City,
+        city = City.objects.get_or_create(
             region=region_,
             city=city_
-        )
+        )[0]
 
         hubs = Hub.objects.filter(
             city=city
         )
 
-        serializer = self.serializer_class(
+        hubs_serializer = self.serializer_class(
             instance=hubs,
             many=True
         )
+        city_serializer = CitySerializer(
+            city
+        )
+
+        response = {
+            "hubs": hubs_serializer.data,
+            "city": city_serializer.data
+        }
 
         return Response(
-            serializer.data,
+            response,
             status.HTTP_200_OK
         )
 
@@ -394,6 +399,73 @@ class HubView(APIView):
             )
         
         serializer.save(city=city, coordinate=coordinates)
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+
+class HubZoneView(APIView):
+    serializer_class = HubZoneSerializer
+
+    def get(self, request, id):
+        hub = get_object_or_404(
+            Hub,
+            id=id
+        )
+
+        serializer = self.serializer_class(
+            HubZone.objects.filter(
+                hub=hub
+            ),
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def post(self, request, id):
+        hub = get_object_or_404(
+            Hub,
+            id=id
+        )
+
+        zone = HubZone(
+            hub=hub,
+            color=request.data.get("color")
+        )
+        zone.save(request.data.get("coordinates")[0])
+
+        serializer = self.serializer_class(
+            zone
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+
+class EditHubZoneView(APIView):
+    serializer_class = HubZoneSerializer
+
+    def put(self, request, id):
+        zone = get_object_or_404(
+            HubZone,
+            id=id
+        )
+
+        zone.color = request.data.get("color")
+        zone.save(
+            request.data.get("coordinates")[0]
+        )
+
+        serializer = self.serializer_class(
+            zone
+        )
 
         return Response(
             serializer.data,

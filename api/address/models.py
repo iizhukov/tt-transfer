@@ -192,3 +192,45 @@ class CityZone(models.Model):
             coords.append([coord.latitude, coord.longitude])
 
         return coords
+
+
+class HubZone(models.Model):
+    hub = models.ForeignKey(
+        Hub, models.CASCADE, verbose_name=_('Хаб')
+    )
+    color = models.CharField(
+        verbose_name=_('Цвет'), choices=ZONE_COLORS, max_length=12
+    )
+    coordinates = models.ManyToManyField(
+        Coordinate,
+    )
+
+    class Meta:
+        db_table = "hub_zone"
+        verbose_name = "Зона хаба"
+        verbose_name_plural = "Зоны хабов"
+
+    def __str__(self) -> str:
+        return f"{self.pk}: {self.hub.title}, {self.color}"
+
+    def save(self, coordinates, *args, **kwargs) -> None:
+        super().save(args, kwargs)
+
+        self.coordinates.clear()
+
+        for latitude, longitude in coordinates:
+            self.coordinates.add(
+                Coordinate.objects.get_or_create(
+                    latitude=latitude,
+                    longitude=longitude
+                )[0]
+            )
+
+
+    def get_coordinates_as_list(self):
+        coords = []
+
+        for coord in self.coordinates.all():
+            coords.append([coord.latitude, coord.longitude])
+
+        return coords

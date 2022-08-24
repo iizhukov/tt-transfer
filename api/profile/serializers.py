@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.forms.models import model_to_dict
 
 from api.authentication.models import User, UserDocument
+from api.cars.serializers import CarSerializer, CarWithOutUserSerializer
 from api.authentication.serializers import ProtectedGetUserSerializer
 from api.profile.models import Company, Manager, Client, Driver, Admin
 
@@ -61,13 +62,26 @@ class ClientSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class ProtectedGetUserSerializer(serializers.ModelSerializer):
+    avatar = serializers.URLField()
+    documents = DocumentSerializer(allow_null=True, many=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'name', 'surname', 'documents',
+            'patronymic', 'role', 'avatar'
+        )
+
+
 class DriverSerializer(serializers.ModelSerializer):
     user = ProtectedGetUserSerializer()
+    cars = CarWithOutUserSerializer(allow_null=True, many=True)
 
     class Meta:
         model = Driver
         fields = "__all__"
-        depth = 1
+        depth = 2
 
 
 class AdminSerializer(serializers.ModelSerializer):

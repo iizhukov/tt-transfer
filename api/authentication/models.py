@@ -65,9 +65,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(
         _('Телефон'), max_length=14, blank=True, null=True,
     )
-    passport = models.CharField(
-        _('Паспорт'), max_length=10, blank=True, null=True,
-    )
     role = models.CharField(
         _('Роль'), max_length=1, choices=ROLES, default='c'
     )

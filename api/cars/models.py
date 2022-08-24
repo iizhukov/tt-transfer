@@ -28,8 +28,17 @@ CAR_CLASSES = (
     ('cargo', 'Грузовой')
 )
 
+CAR_STATUSES = (
+    ('main', 'Основной'),
+    ('spare', 'Запасной')
+)
+
 
 class Car(models.Model):
+    user = models.ForeignKey(
+        "authentication.User", models.CASCADE, verbose_name=_('Пользователь'),
+        default=None, blank=True
+    )
     brand = models.CharField(
         _("Марка"), max_length=64,
     )
@@ -53,6 +62,10 @@ class Car(models.Model):
     car_class = models.CharField(
         _("Класс"), choices=CAR_CLASSES, max_length=24,
     )
+    status = models.CharField(
+        _('Статус автомобиля'), choices=CAR_STATUSES, max_length=12,
+        default="spare"
+    )
 
     class Meta:
         db_table = "car"
@@ -61,3 +74,14 @@ class Car(models.Model):
     
     def __str__(self) -> str:
         return f"{self.brand} {self.model}"
+
+    def set_main_car(self):
+        Car.objects.filter(
+            user=self.user
+        ).update(
+            status="spare"
+        )
+
+        self.status = "main"
+        self.save()
+        return self.status

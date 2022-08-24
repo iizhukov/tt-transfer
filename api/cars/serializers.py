@@ -9,3 +9,10 @@ class CarSerializer(serializers.ModelSerializer):
         model = Car
         fields = '__all__'   
         # depth = 0
+
+
+class CarWithOutUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Car
+        include = '__all__'
+        exclude = ("user", )

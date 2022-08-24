@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.forms.models import model_to_dict
 
 from .models import User, ResetPasswordCode
+from api.authentication.models import UserDocument
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email', 'password', 'confirmed'
+            'phone', 'email', 'password', 'confirmed'
         )
 
     def save(self, **kwargs):
@@ -30,7 +31,7 @@ class GetUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'name', 'surname', 'patronymic', 'role',
-            'phone', 'passport', 'email', 'confirmed', 'avatar'
+            'phone', 'email', 'confirmed', 'avatar'
         )
 
 

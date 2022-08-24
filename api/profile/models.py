@@ -115,16 +115,15 @@ class Driver(models.Model):
     user = models.OneToOneField(
         "authentication.User", models.CASCADE, verbose_name=_('Пользователь')
     )
-    car = models.OneToOneField(
-        Car, models.CASCADE, verbose_name=_('Автомобиль'),
-        null=True, blank=True
-    )
     city = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('Город'),
         null=True, blank=True
     )
+    passport = models.CharField(
+        _('Паспорт'), max_length=10, blank=True, null=True,
+    )
     driving_license = models.CharField(
-        verbose_name=_('Права'), max_length=10,
+        verbose_name=_('Водительское удостоверение'), max_length=10,
         null=True, blank=True
     )
     status = models.CharField(
