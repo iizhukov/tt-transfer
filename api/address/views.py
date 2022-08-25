@@ -464,15 +464,18 @@ class EditHubZoneView(APIView):
             request.data.get("coordinates")[0]
         )
 
-        serializer = self.serializer_class(
-            HubZone.objects.filter(
-                hub=hub
-            ),
-            many=True
+        zones: List[HubZone] = HubZone.objects.filter(
+            hub=hub
         )
 
+        response = []
+
+        for ind, zone in enumerate(zones):
+            response.append(model_to_dict(zone))
+            response[ind]["coordinates"] = zone.get_coordinates_as_list()
+
         return Response(
-            serializer.data,
+            response,
             status.HTTP_200_OK
         )
 
