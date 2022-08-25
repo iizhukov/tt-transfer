@@ -1,15 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from api.address.models import CityZone, City
+from api.address.models import CityZone, City, HubZone, Hub
 from api.cars.models import CAR_CLASSES
 from api.exceptions import TariffNotSpecifiedException
-
-
-TARIFF_TYPE = (
-    ("default", "Стандартный"),
-    ("contract", "Договор")
-)
 
 
 class PriceToCarClass(models.Model):
@@ -32,24 +26,6 @@ class PriceToCarClass(models.Model):
         return f"{self.car_class} - ({self.customer_price} , {self.driver_price})"
 
 
-class ZoneToPrice(models.Model):
-    zone = models.ForeignKey(
-        CityZone, models.CASCADE,
-        verbose_name=_('Зона')
-    )
-    prices = models.ManyToManyField(
-        PriceToCarClass, verbose_name=_('Цены к зоне'),
-    )
-
-    class Meta:
-        db_table = "zone_to_prices"
-        verbose_name = "Зона к ценам"
-        verbose_name_plural = "Зоны к ценам"
-
-    def __str__(self) -> str:
-        return f"{self.zone}"
-
-
 class ServiceToPrice(models.Model):
     service = models.CharField(
         _('Услуга'), max_length=128,
@@ -67,23 +43,50 @@ class ServiceToPrice(models.Model):
         return f"{self.service}"
 
 
+class AdditionalHubZoneToPrice(models.Model):
+    zone = models.ForeignKey(
+        HubZone, models.CASCADE,
+        verbose_name=_('Зона')
+    )
+    prices = models.ManyToManyField(
+        PriceToCarClass, verbose_name=_('Цены к зоне'),
+    )
+
+    class Meta:
+        db_table = "additional_hubzone_to_price"
+        verbose_name = "Зона хаба к ценам"
+        verbose_name_plural = "Зоны хаба к ценам"
+
+    def __str__(self) -> str:
+        return f"{self.zone}"
+
+
+class HubToPrice(models.Model):
+    hub: Hub = models.ForeignKey(
+        Hub, models.CASCADE, verbose_name=_('Хаб')
+    )
+    prices = models.ManyToManyField(
+        PriceToCarClass, verbose_name=_('Цены к классу авто')
+    )
+    additional_hubzone_prices = models.ManyToManyField(
+        AdditionalHubZoneToPrice, verbose_name=_('Добавочная стоимость к зонам хаба')
+    )
+
+    class Meta:
+        db_table = "hub_to_price"
+        verbose_name = "Хаб к ценам"
+        verbose_name_plural = "Хабы у ценам"
+
+    def __str__(self) -> str:
+        return f"{self.hub.title}"
+
+
 class IntracityTariff(models.Model):
-    name = models.CharField(
-        _('Название'), max_length=128
-    )
-    type = models.CharField(
-        _('Тип тарифа'), choices=TARIFF_TYPE,
-        max_length=16, default="default"
-    )
-    city = models.ForeignKey(
-        City, models.CASCADE, verbose_name=_('Город'),
-        null=True, blank=True
-    )
-    zone_prices = models.ManyToManyField(
-        ZoneToPrice, verbose_name=_('Цены к зонам')
-    )
     service_prices = models.ManyToManyField(
         ServiceToPrice, verbose_name=_('Цены к услугам')
+    )
+    hub_to_prices = models.ManyToManyField(
+        HubToPrice, verbose_name=_('Цены к зонам')
     )
 
     class Meta:
@@ -98,10 +101,6 @@ class IntracityTariff(models.Model):
 class IntercityTariff(models.Model):
     distance = models.IntegerField(
         _('Расстояние')
-    )
-    from_city = models.ForeignKey(
-        City, models.CASCADE, verbose_name=_('Из грода'),
-        related_name=_("from_city")
     )
     to_city = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('В город'),
@@ -124,6 +123,28 @@ class IntercityTariff(models.Model):
 
 
 class Tariff(models.Model):
+    CURRENCIES = (
+        ('rub', 'Рубль'),
+        ('eur', 'Евро'),
+        ('usd', 'Доллар'),
+        ('cny', 'Юани'),
+    )
+
+    name = models.CharField(
+        _('Название'), max_length=128,
+        null=True, blank=True
+    )
+    city = models.ForeignKey(
+        City, models.CASCADE, verbose_name=_('Город'),
+        null=True, blank=True
+    )
+    currency = models.CharField(
+        _('валюта'), choices=CURRENCIES,
+        default="rub", max_length=5
+    )
+    comments = models.TextField(
+        _('Комментарии'), null=True, blank=True
+    )
     intracity_tariff = models.ForeignKey(
         IntracityTariff, models.CASCADE,
         verbose_name=_('Внутригородской тариф'),
@@ -135,21 +156,14 @@ class Tariff(models.Model):
         null=True, blank=True
     )
 
+    is_commission = models.BooleanField(
+        _('Комиссионный?'), default=False
+    )
+
     class Meta:
         db_table = "tariff"
         verbose_name = "Тариф"
         verbose_name_plural = "Тарифы"
 
     def __str__(self) -> str:
-        return self.tariff
-
-    @property
-    def tariff(self):
-        if self.intercity_tariff_id is not None:
-            return self.intercity_tariff
-        if self.intracity_tariff_id is not None:
-            return self.intracity_tariff
-
-        raise TariffNotSpecifiedException(
-            "Не указан междугородской или внутригородской тариф"
-        )
+        return f"{self.city.city}: {self.name}, Комиссионный-{self.is_commission}"

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from .models import (
     IntracityTariff, PriceToCarClass,
-    ServiceToPrice, ZoneToPrice
+    ServiceToPrice
 )
 
 

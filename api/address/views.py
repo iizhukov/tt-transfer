@@ -448,10 +448,6 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
-
-class EditHubZoneView(APIView):
-    serializer_class = HubZoneSerializer
-
     def put(self, request: Request, hub_id: int):
         zone = get_object_or_404(
             HubZone,
@@ -469,6 +465,18 @@ class EditHubZoneView(APIView):
 
         return Response(
             serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def delete(self, request: Request, hub_id: int):
+        zone = get_object_or_404(
+            HubZone,
+            id=hub_id
+        )
+        zone.delete()
+
+        return Response(
+            {"detail": "Deleted"},
             status.HTTP_200_OK
         )
 
@@ -518,6 +526,18 @@ class GlobalAddressView(APIView):
     serializer_class = GlobalAddressSerializer
 
     def get(self, request: Request):
-        region = request.query_params.get("region")
-        city = request.query_params.get("city")
+        serializer = self.serializer_class(
+            GlobalAddress.objects.all(),
+            many=True
+        )
 
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def post(self, request: Request):
+        city = City.objects.get_or_create(
+            region=request.data.get("region"),
+            city=request.data.get("city")
+        )

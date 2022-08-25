@@ -16,7 +16,6 @@ urlpatterns = [
 
     # Hub
     path('hub/', views.HubView.as_view(), name="hub"),
-    path('hub-zones/<int:hub_id>/', views.HubZoneView.as_view(), name="add_hub_zone"),
-    path("edit-hub-zone/<int:hub_id>/", views.EditHubZoneView.as_view(), name="edit_zone_hub"),
+    path('hub-zones/<int:hub_id>/', views.HubZoneView.as_view(), name="hub_zones"),
     path('get-hub-zone-by-coordinates/', views.GetHubZoneByCoordsAndHubView.as_view(), name="get_hub_zone_by_coords")
 ]

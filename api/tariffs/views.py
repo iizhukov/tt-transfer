@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from api.address.models import City
 from .models import (
     IntracityTariff, PriceToCarClass,
-    ServiceToPrice, ZoneToPrice
+    ServiceToPrice,
 )
 from .serializer import (
     IntracityTariffSerializer
