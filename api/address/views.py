@@ -448,10 +448,14 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def put(self, request: Request, hub_id: int):
+
+class EditHubZoneView(APIView):
+    serializer_class = HubZoneSerializer
+
+    def put(self, request: Request, zone_id: int):
         zone = get_object_or_404(
             HubZone,
-            id=hub_id
+            id=zone_id
         )
 
         zone.color = request.data.get("color")
@@ -468,10 +472,10 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def delete(self, request: Request, hub_id: int):
+    def delete(self, request: Request, zone_id: int):
         zone = get_object_or_404(
             HubZone,
-            id=hub_id
+            id=zone_id
         )
         zone.delete()
 
