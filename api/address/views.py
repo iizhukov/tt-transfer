@@ -457,6 +457,7 @@ class EditHubZoneView(APIView):
             HubZone,
             id=zone_id
         )
+        hub = zone.hub
 
         zone.color = request.data.get("color") or zone.color
         zone.save(
@@ -464,7 +465,10 @@ class EditHubZoneView(APIView):
         )
 
         serializer = self.serializer_class(
-            zone
+            HubZone.objects.filter(
+                hub=hub
+            ),
+            many=True
         )
 
         return Response(
