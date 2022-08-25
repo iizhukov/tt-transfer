@@ -458,7 +458,7 @@ class EditHubZoneView(APIView):
             id=zone_id
         )
 
-        zone.color = request.data.get("color")
+        zone.color = request.data.get("color") or zone.color
         zone.save(
             request.data.get("coordinates")[0]
         )

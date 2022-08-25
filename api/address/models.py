@@ -221,18 +221,19 @@ class HubZone(models.Model):
     def __str__(self) -> str:
         return f"{self.pk}: {self.hub.title}, {self.color}"
 
-    def save(self, coordinates, *args, **kwargs) -> None:
+    def save(self, coordinates=None, *args, **kwargs) -> None:
         super().save(args, kwargs)
 
-        self.coordinates.clear()
+        if coordinates:
+            self.coordinates.clear()
 
-        for latitude, longitude in coordinates:
-            self.coordinates.add(
-                Coordinate.objects.get_or_create(
-                    latitude=latitude,
-                    longitude=longitude
-                )[0]
-            )
+            for latitude, longitude in coordinates:
+                self.coordinates.add(
+                    Coordinate.objects.get_or_create(
+                        latitude=latitude,
+                        longitude=longitude
+                    )[0]
+                )
 
     def get_coordinates_as_list(self):
         coords = []
