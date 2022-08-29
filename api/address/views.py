@@ -92,10 +92,11 @@ class AddAddressView(APIView):
         city_serializer = CitySerializer(data=request.data)
         city_serializer.is_valid()
 
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=city_serializer.validated_data.get('region'),
             city=city_serializer.validated_data.get('city')
-        )[0]
+        )
 
         address = Address(
             city=city,
@@ -330,10 +331,11 @@ class HubView(APIView):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=region_,
             city=city_
-        )[0]
+        )
 
         hubs = Hub.objects.filter(
             city=city

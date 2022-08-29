@@ -17,15 +17,18 @@ from django.utils.translation import gettext_lazy as _
 
 
 CAR_CLASSES = (
-    ('business', 'Бизнес'),
     ('standart', 'Стандарт'),
-    ('representative', 'Представительский'),
-    ('minivan', 'Минивен'),
-    ('minibus', 'Микроавтобус'),
     ('comfort', 'Комфорт'),
-    ('bus', 'Автобус'),
-    ('business_plus', 'Бизнес плюс'),
-    ('cargo', 'Грузовой')
+    ('minivan', 'Минивен'),
+    ('business', 'Бизнес'),
+    ('representative', 'Представительский'),
+    ('suv', 'SUV'),
+    ('minibus', 'Микроавтобус'),
+    ('minivan_business', 'Минивен Бизнес'),
+    ('minibus_business', 'Микроавтобус Бизнес'),
+    ('bus30', 'Автобус 30+'),
+    ('bus43', 'Автобус 43+'),
+    ('bus50', 'Автобус 50+'),
 )
 
 CAR_STATUSES = (

@@ -1,17 +1,47 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from api.address.models import CityZone, City, HubZone, Hub
 from api.cars.models import CAR_CLASSES
 from api.exceptions import TariffNotSpecifiedException
 
 
+def tariff_derault_timelife():
+    return timezone.now() + timezone.timedelta(days=365)
+
+
+def set_default_car_classes_price(customer_price=0):
+    prices = []
+
+    for car_class in CAR_CLASSES:
+        price = PriceToCarClass.objects.create(
+            car_class=car_class,
+            customer_price=customer_price
+        )
+        prices.append(price)
+
+    return prices
+
+
+DEFAULT_SERVICES_LIST = (
+    ("Аренда по времени (руб./час)", "rent_by_time"),
+    ("Аренда по расстоянию (руб./км)", "rent_by_distance"),
+    ("Дополнительные заезд (руб)", "addtional_check_in"),
+    ("Ожидание (руб)", "expectation"),
+)
+DEFAULT_SERVICES_ONLY_DRIVERS_LIST = (
+    ("Минимальный заказ (час)", "minimal_order"),
+)
+
+
 class PriceToCarClass(models.Model):
     car_class = models.CharField(
-        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=32
+        _('Класс автомобиля'), choices=CAR_CLASSES, max_length=64
     )
     customer_price = models.IntegerField(
-        _('Цена заказчика'), default=0
+        _('Цена заказчика'), default=None,
+        null=True, blank=True
     )
     driver_price = models.IntegerField(
         _('Цена водителя'), default=0
@@ -27,11 +57,17 @@ class PriceToCarClass(models.Model):
 
 
 class ServiceToPrice(models.Model):
-    service = models.CharField(
-        _('Услуга'), max_length=128,
+    title = models.CharField(
+        _('Название'), max_length=128,
+        default=""
     )
-    prices = models.ManyToManyField(
-        PriceToCarClass, verbose_name=_('Услуга к цене')
+    slug = models.CharField(
+        _('Тип'), max_length=128,
+        default=""
+    )
+    prices: PriceToCarClass = models.ManyToManyField(
+        PriceToCarClass, verbose_name=_('Услуга к цене'),
+        blank=True
     )
 
     class Meta:
@@ -40,7 +76,22 @@ class ServiceToPrice(models.Model):
         verbose_name_plural = "Услуги к ценам"
 
     def __str__(self) -> str:
-        return f"{self.service}"
+        return f"{self.pk}: {self.title} - {self.slug}"
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        self._add_prices_to_service()
+
+        return self
+
+    def _add_prices_to_service(self):
+        customer_price = 0
+
+        if self.slug in DEFAULT_SERVICES_ONLY_DRIVERS_LIST:
+            customer_price = None
+
+        self.prices.add(*set_default_car_classes_price(customer_price))
 
 
 class AdditionalHubZoneToPrice(models.Model):
@@ -59,6 +110,16 @@ class AdditionalHubZoneToPrice(models.Model):
 
     def __str__(self) -> str:
         return f"{self.zone}"
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        self._set_prices_to_zone()
+
+        return self
+
+    def _set_prices_to_zone(self):
+        self.prices.add(*set_default_car_classes_price())
 
 
 class HubToPrice(models.Model):
@@ -80,11 +141,31 @@ class HubToPrice(models.Model):
     def __str__(self) -> str:
         return f"{self.hub.title}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        self._set_prices()
+        self._add_addtional_hub_zones_price()
+
+        return self
+
+    def _set_prices(self):
+        self.prices.add(*set_default_car_classes_price())
+
+    def _add_addtional_hub_zones_price(self):
+        hubzones = HubZone.objects.filter(
+            hub=self.hub
+        )
+
+        for zone in hubzones:
+            self.additional_hubzone_prices.add(
+                AdditionalHubZoneToPrice.objects.create(
+                    zone=zone
+                )
+            )
+
 
 class IntracityTariff(models.Model):
-    service_prices = models.ManyToManyField(
-        ServiceToPrice, verbose_name=_('Цены к услугам')
-    )
     hub_to_prices = models.ManyToManyField(
         HubToPrice, verbose_name=_('Цены к зонам')
     )
@@ -95,7 +176,12 @@ class IntracityTariff(models.Model):
         verbose_name_plural = "Внутригородские тарифы"
     
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.id}"
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        return self
 
 
 class IntercityTariff(models.Model):
@@ -105,9 +191,6 @@ class IntercityTariff(models.Model):
     to_city = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('В город'),
         related_name=_('to_city')
-    )
-    service_prices = models.ManyToManyField(
-        ServiceToPrice, verbose_name=_('Цены к услугам')
     )
     prices = models.ManyToManyField(
         PriceToCarClass, verbose_name=_('Услуга к цене')
@@ -130,11 +213,11 @@ class Tariff(models.Model):
         ('cny', 'Юани'),
     )
 
-    name = models.CharField(
-        _('Название'), max_length=128,
+    title = models.CharField(
+        _('Название'), max_length=128, 
         null=True, blank=True
     )
-    city = models.ForeignKey(
+    city: City = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('Город'),
         null=True, blank=True
     )
@@ -145,12 +228,16 @@ class Tariff(models.Model):
     comments = models.TextField(
         _('Комментарии'), null=True, blank=True
     )
-    intracity_tariff = models.ForeignKey(
+    services: ServiceToPrice = models.ManyToManyField(
+        ServiceToPrice, verbose_name=_('Цены к услугам'),
+        blank=True
+    )
+    intracity_tariff = models.OneToOneField(
         IntracityTariff, models.CASCADE,
         verbose_name=_('Внутригородской тариф'),
         null=True, blank=True
     )
-    intercity_tariff = models.ForeignKey(
+    intercity_tariff: IntracityTariff = models.OneToOneField(
         IntercityTariff, models.CASCADE,
         verbose_name=_('межгородской тариф'),
         null=True, blank=True
@@ -159,6 +246,9 @@ class Tariff(models.Model):
     is_commission = models.BooleanField(
         _('Комиссионный?'), default=False
     )
+    lifetime = models.DateTimeField(
+        _('Срок жизни'), default=tariff_derault_timelife
+    )
 
     class Meta:
         db_table = "tariff"
@@ -166,4 +256,39 @@ class Tariff(models.Model):
         verbose_name_plural = "Тарифы"
 
     def __str__(self) -> str:
-        return f"{self.city.city}: {self.name}, Комиссионный-{self.is_commission}"
+        return f"{self.pk}: {self.city.city}, {self.title}, Комиссионный: {self.is_commission}"
+
+    def save(self, *args, **kwargs) -> None:
+        self._set_hub_prices()
+
+        super().save(*args, **kwargs)
+
+        self._set_default_services()
+
+        return self
+
+    def _set_default_services(self):
+        for service in [
+            *DEFAULT_SERVICES_LIST,
+            *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
+            ]:
+            service_ = ServiceToPrice.objects.create(
+                title=service[0],
+                slug=service[1]
+            )
+            self.services.add(service_)
+
+    def _set_hub_prices(self):
+        intracity_tariff = IntracityTariff.objects.create()
+        
+        hubs = Hub.objects.filter(
+            city=self.city
+        )
+
+        for hub in hubs:
+            hub_to_price = HubToPrice.objects.create(
+                hub=hub
+            )
+            intracity_tariff.hub_to_prices.add(hub_to_price)
+        
+        self.intracity_tariff = intracity_tariff
