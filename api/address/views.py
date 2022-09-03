@@ -606,7 +606,14 @@ class FilterRegionsView(APIView):
         response = []
 
         for region in REGIONS:
-            response.append((region, fuzz.ratio(search, region)))
+            coincidence = fuzz.ratio(search, region)
+            response.append((region, coincidence))
+
+            if coincidence == 100:
+                return Response(
+                    [region],
+                    status.HTTP_200_OK
+                )
 
         response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
 
@@ -624,10 +631,28 @@ class FilterCitiesView(APIView):
         region = request.query_params.get("region")
         search = request.query_params.get("search")
 
+        print(region)
+
         response = []
 
+        if region not in REGIONS:
+            return Response(
+                {
+                    "detail": "Регион не найден"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
         for city in CITIES.get(region):
-            response.append((city, fuzz.ratio(search, city)))
+            coincidence = fuzz.ratio(search, city)
+            response.append((city, coincidence))
+
+            if coincidence == 100:
+                return Response(
+                    [city],
+                    status.HTTP_200_OK
+                )
+
 
         response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
 
