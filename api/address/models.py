@@ -64,6 +64,9 @@ class City(models.Model):
 
         return None
 
+    def get_center_as_string(self):
+        return f"{self.center.latitude}, {self.center.longitude}"
+
 
 class AbstractAddressModel(models.Model):
     city = models.ForeignKey(
@@ -138,10 +141,19 @@ class Hub(AbstractAddressModel):
         verbose_name_plural = "Хабы"
 
     def __str__(self) -> str:
-        return f"{self.city.city}: {self.title}"
+        return f"{self.pk}: {self.city.city}, {self.title}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        return self
 
 
-class GlobalAddress(Hub):
+class GlobalAddress(AbstractAddressModel):
+    address = models.CharField(
+        _('адрес'), max_length=256, null=True
+    )
+
     class Meta:
         db_table = "address_globaladdress"
         verbose_name = "Глобальный адрес"

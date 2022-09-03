@@ -1,3 +1,4 @@
+from urllib.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,7 +8,7 @@ from .serializers import CarSerializer
 from api.permissions import IsDriverUser, IsManagerUser
 from api.authentication.models import User
 from api.authentication.serializers import GetUserSerializer
-from .models import Car
+from .models import Car, CAR_CLASSES
 
 
 class CarsListView(APIView):
@@ -48,3 +49,19 @@ class UserCarView(APIView):
 
     def post(self, request):
         pass
+
+
+class GetCarClassesView(APIView):
+    def get(self, request: Request):
+        response = []
+
+        for car_class in CAR_CLASSES:
+            response.append({
+                "title": car_class[1],
+                "slug": car_class[0]
+            })
+
+        return Response(
+            response,
+            status.HTTP_200_OK
+        )

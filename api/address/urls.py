@@ -19,4 +19,10 @@ urlpatterns = [
     path('hub-zones/<int:hub_id>/', views.HubZoneView.as_view(), name="hub_zones"),
     path('edit-hub-zone/<int:zone_id>/', views.EditHubZoneView.as_view(), name="edit_hub_zone"),
     path('get-hub-zone-by-coordinates/', views.GetHubZoneByCoordsAndHubView.as_view(), name="get_hub_zone_by_coords"),
+
+    path('distance-and-duration/', views.GetDistanceAndDurationBetweenCitiesView.as_view(), name="get_distance_and_duration"),
+
+    # Search
+    path('filter-regions', views.FilterRegionsView.as_view(), name="filter_regions"),
+    path('filter-cities', views.FilterCitiesView.as_view(), name="filter_cities"),
 ]

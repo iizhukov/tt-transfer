@@ -32,9 +32,13 @@ INSTALLED_APPS = [
     # 1c
     # 'cml',
 
+    # Workers
+    # 'workers',
+
     # rest framework
     'rest_framework',
     'corsheaders',
+    'channels',
 
     # map
     'map.apps.MapConfig',
@@ -84,8 +88,30 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tt_transfer.wsgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        ### Method 1: Via redis lab
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [
+        #       'redis://h:<password>;@<redis Endpoint>:<port>' 
+        #     ],
+        # },
 
+        ### Method 2: Via local Redis
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #      "hosts": [('127.0.0.1', 6379)],
+        # },
+
+        ### Method 3: Via In-memory channel layer
+        ## Using this method.
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
+
+WSGI_APPLICATION = 'tt_transfer.wsgi.application'
+ASGI_APPLICATION = "tt_transfer.asgi.application"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

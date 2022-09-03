@@ -1,4 +1,5 @@
 from typing import List
+from urllib import response
 from django.forms import model_to_dict
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from shapely.geometry import Point, Polygon
 from django.shortcuts import get_object_or_404
+from fuzzywuzzy import fuzz
 
 from .models import (
     Address, City, CityZone,
@@ -20,6 +22,16 @@ from .serializers import (
     HubSerializer, HubZoneSerializer,
     GlobalAddressSerializer
 )
+from api.request import DistanceAndDuration
+
+
+REGIONS = set(City.objects.values_list('region', flat=True))
+CITIES = {
+    region: set(City.objects.filter(
+        region=region
+    ).values_list("city", flat=True))
+    for region in REGIONS
+}
 
 
 class CityView(APIView):
@@ -68,10 +80,9 @@ class AddressView(APIView):
 
     def get(self, request: Request):
         serializer = self.serializer_class(
-            data=Address.objects.all(),
+            Address.objects.all(),
             many=True,
         )
-        serializer.is_valid()
 
         return Response(
             serializer.data,
@@ -553,4 +564,77 @@ class GlobalAddressView(APIView):
         city = City.objects.get_or_create(
             region=request.data.get("region"),
             city=request.data.get("city")
+        )
+
+
+class GetDistanceAndDurationBetweenCitiesView(APIView):
+    def get(self, request: Request):
+        regions = request.query_params.getlist("region")
+        cities = request.query_params.getlist("city")
+
+        cities_: List[City] = []
+        for i in range(len(regions)):
+            cities_.append(
+                City.objects.get_or_create(
+                    region=regions[i],
+                    city=cities[i]
+                )[0]
+            )
+
+        print(cities_)
+
+        distance, hours, minutes = DistanceAndDuration.get(
+            cities_[0].get_center_as_string(),
+            cities_[-1].get_center_as_string(),
+            [cities_[i].get_center_as_string() for i in range(1, len(cities_) - 1)]
+        )
+
+        return Response(
+            {
+                "distance": distance,
+                "hours": hours,
+                "minutes": minutes
+            },
+            status.HTTP_200_OK
+        )
+
+
+class FilterRegionsView(APIView):
+    def get(self, request: Request):
+        search = request.query_params.get("search")
+
+        response = []
+
+        for region in REGIONS:
+            response.append((region, fuzz.ratio(search, region)))
+
+        response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
+
+        return Response(
+            list(map(
+                lambda value: value[0],
+                response
+            )),
+            status.HTTP_200_OK
+        )
+
+
+class FilterCitiesView(APIView):
+    def get(self, request: Request):
+        region = request.query_params.get("region")
+        search = request.query_params.get("search")
+
+        response = []
+
+        for city in CITIES.get(region):
+            response.append((city, fuzz.ratio(search, city)))
+
+        response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
+
+        return Response(
+            list(map(
+                lambda value: value[0],
+                response
+            )),
+            status.HTTP_200_OK
         )
