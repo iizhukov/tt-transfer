@@ -43,7 +43,7 @@ class ServiceToPriceSerializer(serializers.ModelSerializer):
 
 
 class TariffSerializer(serializers.ModelSerializer):
-    services = ServiceToPriceSerializer(many=True)
+    services = ServiceToPriceSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tariff
