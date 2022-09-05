@@ -612,7 +612,7 @@ class FilterRegionsView(APIView):
             )
 
         for region in REGIONS:
-            coincidence = fuzz.ratio(search, region)
+            coincidence = fuzz.ratio(search.lower(), region.lower())
             response.append((region, coincidence))
 
             if coincidence == 100:
@@ -656,7 +656,7 @@ class FilterCitiesView(APIView):
             )
 
         for city in CITIES.get(region):
-            coincidence = fuzz.ratio(search, city)
+            coincidence = fuzz.ratio(search.lower(), city.lower())
             response.append((city, coincidence))
 
             if coincidence == 100:
