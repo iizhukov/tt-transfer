@@ -1,4 +1,3 @@
-from token import RIGHTSHIFTEQUAL
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +8,9 @@ from api.address.models import City, GlobalAddress
 from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff,
-    GlobalAddressToPrice, CityToPrice
+    GlobalAddressToPrice, CityToPrice,
+    DEFAULT_SERVICES_LIST,
+    DEFAULT_SERVICES_ONLY_DRIVERS_LIST
 )
 from .serializer import (
     IntracityTariffSerializer, TariffSerializer,
@@ -19,6 +20,12 @@ from .serializer import (
 from api.address.serializers import (
     CitySerializer, GlobalAddressSerializer
 )
+
+
+SERVICES = [
+    *DEFAULT_SERVICES_LIST,
+    *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
+]
 
 
 class TariffView(APIView):
@@ -253,5 +260,22 @@ class AddLocationToTariff(APIView):
 
         return Response(
             {},
+            status.HTTP_200_OK
+        )
+
+
+class GetServicesView(APIView):
+    def get(self, request: Request):
+        response = []
+
+        for ind, service in enumerate(SERVICES, 1):
+            response.append({
+                "id": ind,
+                "title": service[0],
+                "slug": service[1]
+            })
+        
+        return Response(
+            response,
             status.HTTP_200_OK
         )

@@ -605,6 +605,12 @@ class FilterRegionsView(APIView):
 
         response = []
 
+        if not search:
+            return Response(
+                [],
+                status.HTTP_200_OK
+            )
+
         for region in REGIONS:
             coincidence = fuzz.ratio(search, region)
             response.append((region, coincidence))
@@ -634,6 +640,12 @@ class FilterCitiesView(APIView):
         print(region)
 
         response = []
+
+        if not search:
+            return Response(
+                [],
+                status.HTTP_200_OK
+            )
 
         if region not in REGIONS:
             return Response(
