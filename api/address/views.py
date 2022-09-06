@@ -481,9 +481,11 @@ class HubZoneView(APIView):
         )
 
         for tariff in tariffs:
-            tariff.intracity_tariff.hub_to_prices._add_addtional_hub_zones_price(
-                [instance]
-            )
+            for hub_to_price in tariff.intracity_tariff.hub_to_prices.all():
+                if hub_to_price.hub == hub:
+                    hub_to_price._add_addtional_hub_zones_price(
+                        [instance]
+                    )
 
 
 class EditHubZoneView(APIView):

@@ -207,7 +207,7 @@ class HubToPrice(models.Model):
 
 
 class IntracityTariff(models.Model):
-    hub_to_prices = models.ManyToManyField(
+    hub_to_prices: List[HubToPrice] = models.ManyToManyField(
         HubToPrice, verbose_name=_('Цены к зонам')
     )
 
