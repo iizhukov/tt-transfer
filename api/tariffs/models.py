@@ -192,7 +192,7 @@ class HubToPrice(models.Model):
     def _set_prices(self):
         self.prices.add(*set_default_car_classes_price())
 
-    def _add_addtional_hub_zones_price(self, hubzones):
+    def _add_addtional_hub_zones_price(self, hubzones=None):
         if not hubzones:
             hubzones = HubZone.objects.filter(
                 hub=self.hub
