@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path('services/', views.GetServicesView.as_view(), name="get_services"),
+    path('edit-prices/<int:tariff_id>/', views.EditTariffPricesView.as_view(), name="edit_tariff_prices"),
     path('price-to-car-class/<int:pk>/', views.PriceToCarClassView.as_view(), name="price_to_car_class"),
 
     path('tariff/', views.TariffView.as_view(), name="tariff"),

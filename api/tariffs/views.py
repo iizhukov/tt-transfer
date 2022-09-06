@@ -304,3 +304,31 @@ class GetServicesView(APIView):
             response,
             status.HTTP_200_OK
         )
+
+
+class EditTariffPricesView(APIView):
+    def put(self, request: Request, tariff_id: int):
+        for price in request.data:
+            to, id = price.split("-")
+            price_to_car_class = PriceToCarClass.objects.get(
+                pk=int(id)
+            )
+
+            if to == "driver":
+                price_to_car_class.driver_price = request.data.get(price, 0)
+            elif to == "customer":
+                price_to_car_class.customer_price = request.data.get(price, 0)
+
+            price_to_car_class.save()
+
+        tariff = Tariff.objects.get(
+            id=tariff_id
+        )
+        serializer = TariffSerializer(
+            tariff
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_201_CREATED
+        )
