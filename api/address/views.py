@@ -461,6 +461,9 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
+    def _add_to_tariffs(self):
+        pass
+
 
 class EditHubZoneView(APIView):
     serializer_class = HubZoneSerializer

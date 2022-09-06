@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 from django.db.models.constraints import UniqueConstraint
+from slugify import slugify
 
 from api.cars.models import CAR_CLASSES
 from api.request import GetCoordsByAddress
@@ -130,6 +131,11 @@ class Address(AbstractAddressModel):
 class Hub(AbstractAddressModel):
     title = models.CharField(
         _('Название'), max_length=256,
+        unique=True
+    )
+    slug = models.SlugField(
+        _('Слаг'), default="",
+        blank=True, null=True
     )
     description = models.TextField(
         _('Описание'), null=True, blank=True
@@ -144,9 +150,14 @@ class Hub(AbstractAddressModel):
         return f"{self.pk}: {self.city.city}, {self.title}"
 
     def save(self, *args, **kwargs):
+        self.slug = self.create_slug()
+
         super().save(*args, **kwargs)
 
         return self
+
+    def create_slug(self):
+        return slugify(self.title)
 
 
 class GlobalAddress(AbstractAddressModel):

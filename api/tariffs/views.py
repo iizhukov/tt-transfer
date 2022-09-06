@@ -1,3 +1,4 @@
+from typing import Dict, List
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -114,7 +115,13 @@ class TariffView(APIView):
 class PriceToCarClassView(APIView):
     serializer_class = PriceToCarClassSerializer
 
-    def put(self, request: Request, pk: int):
+    def pust(self, request: Request, pk: int | None = None):
+        if isinstance(pk, int):
+            return self.put_by_id(request, pk)
+        else:
+            return self.put_many(request, pk)
+
+    def put_by_id(self, request: Request, pk: int):
         serializer = self.serializer_class(
             instance=get_object_or_404(
                 PriceToCarClass,
@@ -128,6 +135,24 @@ class PriceToCarClassView(APIView):
 
         return Response(
             serializer.data,
+            status.HTTP_200_OK
+        )
+
+    def put_many(self, request: Request):
+        prices: List[Dict[str, str]] = request.data.getlist("prices")
+
+        for price in prices:
+            serializer = self.serializer_class(
+                instance=PriceToCarClass.objects.filter(
+                    pk=price.get("id")
+                ).first(),
+                data=price
+            )
+            if serializer.is_valid():
+                serializer.save()
+        
+        return Response(
+            {},
             status.HTTP_200_OK
         )
 

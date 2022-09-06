@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Город',
                 'verbose_name_plural': 'Города',
-                'db_table': 'address_city2',
+                'db_table': 'address_city',
             },
         ),
         migrations.CreateModel(
