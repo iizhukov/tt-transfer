@@ -1,3 +1,4 @@
+from turtle import tracer
 from typing import List
 from urllib import response
 from django.forms import model_to_dict
@@ -22,6 +23,7 @@ from .serializers import (
     HubSerializer, HubZoneSerializer,
     GlobalAddressSerializer
 )
+from api.tariffs.models import Tariff
 from api.request import DistanceAndDuration
 
 
@@ -408,12 +410,22 @@ class HubView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
         
-        serializer.save(city=city, coordinate=coordinates)
+        instance = serializer.save(city=city, coordinate=coordinates)
+
+        self._add_to_tariff(city, instance)
 
         return Response(
             serializer.data,
             status.HTTP_200_OK
         )
+
+    def _add_to_tariff(self, city: City, instance):
+        tariffs: List[Tariff] = Tariff.objects.filter(
+            city=city
+        )
+
+        for tariff in tariffs:
+            tariff._set_hub_prices([instance])
 
 
 class HubZoneView(APIView):
@@ -450,7 +462,9 @@ class HubZoneView(APIView):
             hub=hub,
             color=request.data.get("color")
         )
-        zone.save(request.data.get("coordinates")[0])
+
+        instance = zone.save(request.data.get("coordinates")[0])
+        self._add_to_tariffs(hub, instance)
 
         serializer = self.serializer_class(
             zone
@@ -461,8 +475,15 @@ class HubZoneView(APIView):
             status.HTTP_200_OK
         )
 
-    def _add_to_tariffs(self):
-        pass
+    def _add_to_tariffs(self, hub, instance):
+        tariffs: List[Tariff] = Tariff.objects.filter(
+            city=hub.city
+        )
+
+        for tariff in tariffs:
+            tariff.intracity_tariff.hub_to_prices._add_addtional_hub_zones_price(
+                [instance]
+            )
 
 
 class EditHubZoneView(APIView):

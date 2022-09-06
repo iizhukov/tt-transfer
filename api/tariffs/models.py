@@ -192,10 +192,11 @@ class HubToPrice(models.Model):
     def _set_prices(self):
         self.prices.add(*set_default_car_classes_price())
 
-    def _add_addtional_hub_zones_price(self):
-        hubzones = HubZone.objects.filter(
-            hub=self.hub
-        )
+    def _add_addtional_hub_zones_price(self, hubzones):
+        if not hubzones:
+            hubzones = HubZone.objects.filter(
+                hub=self.hub
+            )
 
         for zone in hubzones:
             self.additional_hubzone_prices.add(
@@ -396,12 +397,13 @@ class Tariff(models.Model):
             )
             self.services.add(service_)
 
-    def _set_hub_prices(self):
-        intracity_tariff = IntracityTariff.objects.create()
+    def _set_hub_prices(self, hubs=None):
+        intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
         
-        hubs = Hub.objects.filter(
-            city=self.city
-        )
+        if not hubs:
+            hubs = Hub.objects.filter(
+                city=self.city
+            )
 
         print(hubs)
 
