@@ -23,7 +23,7 @@ from .serializers import (
     HubSerializer, HubZoneSerializer,
     GlobalAddressSerializer
 )
-from api.tariffs.models import Tariff
+from api.tariffs.models import Tariff, AdditionalHubZoneToPrice
 from api.request import DistanceAndDuration
 
 
@@ -476,6 +476,8 @@ class HubZoneView(APIView):
         )
 
     def _add_to_tariffs(self, hub, instance):
+        print(instance)
+
         tariffs: List[Tariff] = Tariff.objects.filter(
             city=hub.city
         )
@@ -483,8 +485,10 @@ class HubZoneView(APIView):
         for tariff in tariffs:
             for hub_to_price in tariff.intracity_tariff.hub_to_prices.all():
                 if hub_to_price.hub == hub:
-                    hub_to_price._add_addtional_hub_zones_price(
-                        [instance]
+                    hub_to_price.additional_hubzone_prices.add(
+                        AdditionalHubZoneToPrice.objects.create(
+                            zone=instance
+                        )
                     )
 
 
