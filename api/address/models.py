@@ -258,6 +258,8 @@ class HubZone(models.Model):
                     )[0]
                 )
 
+        return self
+
     def get_coordinates_as_list(self):
         coords = []
 
