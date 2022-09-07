@@ -6,7 +6,8 @@ from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff, IntercityTariff,
     HubToPrice, CityToPrice, GlobalAddressToPrice,
-    CityToPrice, GlobalAddressToPrice
+    CityToPrice, GlobalAddressToPrice,
+    AdditionalHubZoneToPrice
 )
 
 
@@ -44,8 +45,26 @@ class ServiceToPriceSerializer(serializers.ModelSerializer):
         return response
 
 
+class AdditionalHubzonePricesSerializer(serializers.ModelSerializer):
+    prices = PriceToCarClassSerializer(many=True)
+
+    class Meta:
+        model = AdditionalHubZoneToPrice
+        fields = "__all__"
+        depth = 2
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["prices"] = sorted(
+            response["prices"],
+            key=lambda x: x["id"]
+        )
+        return response
+
+
 class HubToPriceSerializer(serializers.ModelSerializer):
     prices = PriceToCarClassSerializer(many=True)
+    additional_hubzone_prices = AdditionalHubzonePricesSerializer()
 
     class Meta:
         model = HubToPrice
