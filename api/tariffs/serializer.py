@@ -135,8 +135,8 @@ class IntercityTariffSerializer(serializers.ModelSerializer):
 
 class TariffSerializer(serializers.ModelSerializer):
     services = ServiceToPriceSerializer(many=True, read_only=True)
-    intracity_tariff = IntracityTariffSerializer()
-    intercity_tariff = IntercityTariffSerializer()
+    intracity_tariff = IntracityTariffSerializer(read_only=True)
+    intercity_tariff = IntercityTariffSerializer(read_only=True)
 
     class Meta:
         model = Tariff
