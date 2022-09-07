@@ -69,7 +69,7 @@ class PriceToCarClass(models.Model):
         verbose_name_plural = "Цены к классам авто"
     
     def __str__(self) -> str:
-        return f"{self.car_class} - ({self.customer_price} , {self.driver_price})"
+        return f"{self.pk}: {self.car_class} - ({self.customer_price} , {self.driver_price})"
 
 
 class ServiceToPrice(models.Model):
@@ -353,7 +353,7 @@ class Tariff(models.Model):
     )
     intercity_tariff: IntercityTariff = models.OneToOneField(
         IntercityTariff, on_delete=models.CASCADE,
-        verbose_name=_('межгородской тариф'),
+        verbose_name=_('Межгородской тариф'),
         null=True, blank=True
     )
 
