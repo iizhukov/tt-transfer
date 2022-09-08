@@ -64,7 +64,7 @@ class AdditionalHubzonePricesSerializer(serializers.ModelSerializer):
 
 class HubToPriceSerializer(serializers.ModelSerializer):
     prices = PriceToCarClassSerializer(many=True)
-    additional_hubzone_prices = AdditionalHubzonePricesSerializer()
+    additional_hubzone_prices = AdditionalHubzonePricesSerializer(many=True)
 
     class Meta:
         model = HubToPrice
