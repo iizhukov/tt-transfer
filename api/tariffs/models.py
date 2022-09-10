@@ -2,10 +2,13 @@ from typing import List
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.db.models.signals import post_save, m2m_changed
+from django.dispatch import receiver
 
 from api.address.models import CityZone, City, HubZone, Hub, GlobalAddress
 from api.cars.models import CAR_CLASSES
 from api.exceptions import TariffNotSpecifiedException
+from api.request import DistanceAndDuration
 
 
 def tariff_derault_timelife():
@@ -234,22 +237,23 @@ class IntracityTariff(models.Model):
 
 
 class AbstractLocationToPrice(models.Model):
-    distance = models.IntegerField(
-        _('Расстояние'), default=0
+    distance = models.FloatField(
+        _('Расстояние'), default=-1
     )
-    duration = models.IntegerField(
-        _('Длительность'), default=0
+    hours_duration = models.IntegerField(
+        _('Часы'), default=-1
+    )
+    minutes_duration = models.IntegerField(
+        _('Минуты'), default=-1
     )
     prices = models.ManyToManyField(
-        PriceToCarClass
+        PriceToCarClass, blank=True
     )
 
     class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
-        self._set_distance_and_duration()
-
         super().save(*args, **kwargs)
 
         self._set_prices()
@@ -266,10 +270,6 @@ class AbstractLocationToPrice(models.Model):
 
     def _set_prices(self):
         self.prices.add(*set_default_car_classes_price())
-
-    def _set_distance_and_duration(self):
-        self.distance = 0
-        self.duration = 0
 
 
 class CityToPrice(AbstractLocationToPrice):
@@ -417,3 +417,27 @@ class Tariff(models.Model):
 
     def _set_intercity_tariff(self):
         self.intercity_tariff = IntercityTariff.objects.create()
+
+
+@receiver(m2m_changed, sender=IntercityTariff.cities.through)
+def func(sender, instance, **kwargs):
+    if kwargs.get("action", "pre_add") == "pre_add":
+        return
+
+    tariff_city: City = instance.tariff.city
+    city_to_price: CityToPrice = CityToPrice.objects.get(
+        id=kwargs.get("pk_set").pop()
+    )
+
+    res = DistanceAndDuration.get(
+        tariff_city.get_center_as_string(),
+        city_to_price.city.get_center_as_string()
+    )
+
+    print(res)
+
+    city_to_price.distance = res[0]
+    city_to_price.hours_duration = res[1]
+    city_to_price.minutes_duration = res[2]
+
+    city_to_price.save()

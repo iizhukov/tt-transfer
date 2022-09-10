@@ -460,7 +460,8 @@ class HubZoneView(APIView):
 
         zone = HubZone(
             hub=hub,
-            color=request.data.get("color")
+            color=request.data.get("color"),
+            title=request.data.get("title") or ""
         )
 
         instance = zone.save(request.data.get("coordinates")[0])

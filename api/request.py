@@ -44,7 +44,7 @@ class DistanceAndDuration:
         if additional_races:
             points.insert(1, *additional_races)
 
-        print(points)
+        # print(points)
 
         DistanceAndDuration.payload["point"] = points
 
@@ -61,7 +61,7 @@ class DistanceAndDuration:
                 hours = paths["time"] // 3.6e6
                 minutes = (paths["time"] - hours * 3.6e6) // 6e4
 
-                print(distance, int(hours), int(minutes))
+                # print(distance, int(hours), int(minutes))
 
                 return distance, int(hours), int(minutes)
             
@@ -87,4 +87,5 @@ class DistanceAndDuration:
         return  city_coord1, city_coord2, additional_races
 
 
-DistanceAndDuration.get("55.755819, 37.617644", "51.768205, 55.096964")
+if __name__ == "__main__":
+    DistanceAndDuration.get("55.755819, 37.617644", "51.768205, 55.096964")

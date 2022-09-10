@@ -229,6 +229,9 @@ class HubZone(models.Model):
     hub: Hub = models.ForeignKey(
         Hub, models.CASCADE, verbose_name=_('Хаб')
     )
+    title: str = models.CharField(
+        _('Название'), max_length=256, default=""
+    )
     color: str = models.CharField(
         verbose_name=_('Цвет'), choices=ZONE_COLORS, max_length=12
     )
