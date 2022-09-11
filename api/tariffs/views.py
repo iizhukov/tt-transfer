@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
 
 from api.address.models import City, GlobalAddress
 from .models import (
@@ -29,7 +30,13 @@ SERVICES = [
 ]
 
 
-class TariffView(APIView):
+class TariffsListPagination(LimitOffsetPagination):
+    page_size = 10
+    page_size_query_param = 'limit'
+    max_page_size = 1000
+
+
+class TariffView(APIView, LimitOffsetPagination):
     serializer_class = TariffSerializer
 
     def get(self, request: Request, tariff_id: int | None = None):
@@ -46,18 +53,14 @@ class TariffView(APIView):
             )
         )
 
-        print(serializer.instance.services)
-
         return Response(
             serializer.data,
             status.HTTP_200_OK
         )
 
     def get_list(self, request: Request):
-        serializer = SimpleTariffSerializer(
-            Tariff.objects.all(),
-            many=True
-        )
+        paginated = self.paginate_queryset(Tariff.objects.all(), request, view=self)
+        serializer = SimpleTariffSerializer(paginated, many=True)
 
         return Response(
             serializer.data,
