@@ -4,6 +4,9 @@ import json
 from .models import City
 
 
+FEDERAL_CITIES = ("Москва", "Санкт-Петерубрг", "Севастополь")
+
+
 def get_cities():
     r = requests.get("https://api.hh.ru/areas")
     regions = r.json()[0]["areas"]
@@ -16,6 +19,16 @@ def get_cities():
             yield (region_, city_)
 
 
+def create_federal_cities():
+    for city in FEDERAL_CITIES:
+        print(
+            City.objects.get_or_create(
+                region=city,
+                city=city
+            )
+        )
+
+
 def create_cities():
     for region, city in get_cities():
         print(
@@ -24,6 +37,7 @@ def create_cities():
                 city=city
             )
         )
+    create_federal_cities()
 
 
 def clear_cities_with_out_center_coordinates(delete=False):
@@ -34,3 +48,4 @@ def clear_cities_with_out_center_coordinates(delete=False):
 
     if delete:
         cities.delete()
+
