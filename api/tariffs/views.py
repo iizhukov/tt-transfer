@@ -106,8 +106,13 @@ class TariffView(APIView):
         )
         tariff.delete()
 
+        serializer = SimpleTariffSerializer(
+            Tariff.objects.all(),
+            many=True
+        )
+
         return Response(
-            {},
+            serializer.data,
             status.HTTP_200_OK
         )
 
