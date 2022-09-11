@@ -254,9 +254,15 @@ class AbstractLocationToPrice(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        set_prices = False
+
+        if not self.pk:
+            set_prices = True
+
         super().save(*args, **kwargs)
 
-        self._set_prices()
+        if set_prices:
+            self._set_prices()
 
         return self
 
