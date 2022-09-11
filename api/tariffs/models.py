@@ -335,7 +335,8 @@ class Tariff(models.Model):
 
     title = models.CharField(
         _('Название'), max_length=128, 
-        null=True, blank=True
+        null=True, blank=True,
+        unique=True
     )
     city: City = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('Город'),

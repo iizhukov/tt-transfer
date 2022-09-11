@@ -191,6 +191,16 @@ class AddLocationToTariff(APIView):
             region=city_serializer.data.get("region")
         )
 
+        if tariff.intercity_tariff.cities.filter(
+            city=city
+        ):
+            return Response(
+                {
+                    "detail": "Город с таким именеем уже задан"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
         city_to_price = CityToPrice.objects.create(
             city=city
         )
