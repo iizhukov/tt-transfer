@@ -68,7 +68,7 @@ class TariffView(APIView, BasicPagination):
 
     def get_list(self, request: Request):
         paginated = self.paginate_queryset(
-            Tariff.objects.all(), request, view=self
+            Tariff.objects.order_by("-id"), request, view=self
         )
         serializer = SimpleTariffSerializer(paginated, many=True)
         response = self.get_paginated_response(serializer.data)
