@@ -87,10 +87,17 @@ class TariffView(APIView, BasicPagination):
             }
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save(city=city)
+        tariff = serializer.save(city=city)
+
+        short_tariff_serializer = SimpleTariffSerializer(
+            tariff
+        )
         
         return Response(
-            serializer.data,
+            {
+                "tariff": serializer.data,
+                "short_tariff": short_tariff_serializer.data,
+            },
             status.HTTP_200_OK
         )
 
