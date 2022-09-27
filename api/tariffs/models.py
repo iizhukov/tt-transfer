@@ -70,7 +70,7 @@ class PriceToCarClass(models.Model):
         db_table = "car_zone_price2car_class"
         verbose_name = "Цена к классу авто"
         verbose_name_plural = "Цены к классам авто"
-    
+
     def __str__(self) -> str:
         return f"{self.pk}: {self.car_class} - ({self.customer_price} , {self.driver_price})"
 
@@ -109,7 +109,7 @@ class ServiceToPrice(models.Model):
             self.prices.remove(price)
 
             price.delete()
-    
+
         return super().delete(*args, **kwargs)
 
     def _add_prices_to_service(self):
@@ -150,7 +150,7 @@ class AdditionalHubZoneToPrice(models.Model):
             self.prices.remove(price)
 
             price.delete()
-    
+
         return super().delete(*args, **kwargs)
 
     def _set_prices_to_zone(self):
@@ -189,7 +189,7 @@ class HubToPrice(models.Model):
             self.prices.remove(price)
 
             price.delete()
-    
+
         return super().delete(*args, **kwargs)
 
     def _set_prices(self):
@@ -218,7 +218,7 @@ class IntracityTariff(models.Model):
         db_table = "intracity_tariff"
         verbose_name = "Внутригородской тариф"
         verbose_name_plural = "Внутригородские тарифы"
-    
+
     def __str__(self) -> str:
         return f"{self.id}"
 
@@ -271,7 +271,7 @@ class AbstractLocationToPrice(models.Model):
             self.prices.remove(price)
 
             price.delete()
-    
+
         return super().delete(*args, **kwargs)
 
     def _set_prices(self):
@@ -334,7 +334,7 @@ class Tariff(models.Model):
     )
 
     title = models.CharField(
-        _('Название'), max_length=128, 
+        _('Название'), max_length=128,
         null=True, blank=True,
         unique=True
     )
@@ -364,6 +364,9 @@ class Tariff(models.Model):
         null=True, blank=True
     )
 
+    is_available = models.BooleanField(
+        _('Доступен?'), default=False
+    )
     is_commission = models.BooleanField(
         _('Комиссионный?'), default=False
     )
@@ -390,14 +393,14 @@ class Tariff(models.Model):
         return self
 
     def delete(self, *args, **kwargs):
-    
+
         return super().delete(*args, **kwargs)
 
     def _set_default_services(self):
         for service in [
             *DEFAULT_SERVICES_LIST,
             *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
-            ]:
+        ]:
             service_ = ServiceToPrice.objects.create(
                 title=service[0],
                 slug=service[1]
@@ -406,7 +409,7 @@ class Tariff(models.Model):
 
     def _set_hub_prices(self, hubs=None):
         intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
-        
+
         if not hubs:
             hubs = Hub.objects.filter(
                 city=self.city
@@ -419,7 +422,7 @@ class Tariff(models.Model):
                 hub=hub
             )
             intracity_tariff.hub_to_prices.add(hub_to_price)
-        
+
         self.intracity_tariff = intracity_tariff
 
     def _set_intercity_tariff(self):
@@ -448,3 +451,5 @@ def func(sender, instance, **kwargs):
     city_to_price.minutes_duration = res[2]
 
     city_to_price.save()
+
+# @receiver()

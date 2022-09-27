@@ -1,6 +1,3 @@
-from django.conf import settings
-from django.core.mail import EmailMessage
-
 from api.mail import SendMailManager
 
 

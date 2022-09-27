@@ -85,7 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     is_superuser = models.BooleanField(_("Администратор"), default=False)
     date_joined = models.DateTimeField(
-        _("Даты регистрации"), default=timezone.now
+        _("Дата регистрации"), default=timezone.now
     )
 
     USERNAME_FIELD = 'email'

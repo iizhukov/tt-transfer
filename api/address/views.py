@@ -1,6 +1,4 @@
-from turtle import tracer
 from typing import List
-from urllib import response
 from django.forms import model_to_dict
 from rest_framework.request import Request
 from rest_framework.response import Response

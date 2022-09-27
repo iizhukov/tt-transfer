@@ -12,6 +12,6 @@ urlpatterns = [
     path('order/', include('api.orders.urls')),
 
     path('profile/', include('api.profile.urls')),
-    path('smartFilter/', include('api.smartFilter.urls')),
+    path('smart-filter/', include('api.smartFilter.urls')),
     path('tariffs/', include('api.tariffs.urls')),
 ]

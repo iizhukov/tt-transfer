@@ -22,7 +22,7 @@ from .serializer import (
 from api.address.serializers import (
     CitySerializer, GlobalAddressSerializer
 )
-
+from api.smartFilter.filters import Filter
 
 SERVICES = [
     *DEFAULT_SERVICES_LIST,
@@ -67,8 +67,10 @@ class TariffView(APIView, BasicPagination):
         )
 
     def get_list(self, request: Request):
+        tariffs = Filter.tariffs(request.query_params)
+
         paginated = self.paginate_queryset(
-            Tariff.objects.order_by("-id"), request, view=self
+            tariffs, request, view=self
         )
         serializer = SimpleTariffSerializer(paginated, many=True)
         response = self.get_paginated_response(serializer.data)
@@ -92,14 +94,19 @@ class TariffView(APIView, BasicPagination):
         short_tariff_serializer = SimpleTariffSerializer(
             tariff
         )
-        
+
         return Response(
-            {
-                "tariff": serializer.data,
-                "short_tariff": short_tariff_serializer.data,
-            },
+            serializer.data,
             status.HTTP_200_OK
         )
+
+        # return Response(
+        #     {
+        #         "tariff": serializer.data,
+        #         "short_tariff": short_tariff_serializer.data,
+        #     },
+        #     status.HTTP_200_OK
+        # )
 
     def put(self, request: Request, tariff_id: int):
         serializer = self.serializer_class(
@@ -173,7 +180,7 @@ class PriceToCarClassView(APIView):
             )
             if serializer.is_valid():
                 serializer.save()
-        
+
         return Response(
             {},
             status.HTTP_200_OK
@@ -186,7 +193,7 @@ class AddLocationToTariff(APIView):
     def post(self, request: Request, tariff_id: int):
         if self.location == "city":
             return self._post_for_city(request, tariff_id)
-        
+
         if self.location == "global_address":
             return self._post_for_global_address(request, tariff_id)
 
@@ -215,7 +222,7 @@ class AddLocationToTariff(APIView):
         )
 
         if tariff.intercity_tariff.cities.filter(
-            city=city
+                city=city
         ):
             return Response(
                 {
@@ -249,7 +256,7 @@ class AddLocationToTariff(APIView):
             GlobalAddress,
             id=request.data.get("global_address_id")
         )
-        
+
         global_address_to_price = GlobalAddressToPrice.objects.create(
             global_address=global_address
         )
@@ -268,7 +275,7 @@ class AddLocationToTariff(APIView):
     def delete(self, request: Request, tariff_id: int, location_id: int):
         if self.location == "city":
             return self._delete_for_city(request, tariff_id, location_id)
-        
+
         if self.location == "global_address":
             return self._delete_for_global_address(request, tariff_id, location_id)
 
@@ -278,7 +285,7 @@ class AddLocationToTariff(APIView):
             },
             status.HTTP_400_BAD_REQUEST
         )
-    
+
     def _delete_for_city(self, request: Request, tariff_id: int, location_id: int):
         tariff: Tariff = get_object_or_404(
             Tariff,
@@ -292,7 +299,7 @@ class AddLocationToTariff(APIView):
 
         for price in city_to_price.prices.all():
             price.delete()
-        
+
         city_to_price.delete()
 
         return Response(
@@ -332,7 +339,7 @@ class GetServicesView(APIView):
                 "title": service[0],
                 "slug": service[1]
             })
-        
+
         return Response(
             response,
             status.HTTP_200_OK

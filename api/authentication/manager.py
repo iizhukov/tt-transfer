@@ -16,23 +16,40 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save()
 
-        match(user.role):
-            case "a":
-                Admin.objects.create(
-                    user=user
-                )
-            case "m":
-                Manager.objects.create(
-                    user=user
-                )
-            case "c":
-                Client.objects.create(
-                    user=user
-                )
-            case "d":
-                Driver.objects.create(
-                    user=user,
-                )
+        if user.role == "a":
+            Admin.objects.create(
+                user=user
+            )
+        elif user.role == "m":
+            Manager.objects.create(
+                user=user
+            )
+        elif user.role == "c":
+            Client.objects.create(
+                user=user
+            )
+        elif user.role == "d":
+            Driver.objects.create(
+                user=user,
+            )
+
+        # match(user.role):
+        #     case "a":
+        #         Admin.objects.create(
+        #             user=user
+        #         )
+        #     case "m":
+        #         Manager.objects.create(
+        #             user=user
+        #         )
+        #     case "c":
+        #         Client.objects.create(
+        #             user=user
+        #         )
+        #     case "d":
+        #         Driver.objects.create(
+        #             user=user,
+        #         )
 
         print(user.role)
 
