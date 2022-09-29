@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 from api.address.models import CityZone, City, HubZone, Hub, GlobalAddress
 from api.cars.models import CAR_CLASSES
+from api.profile.models import Company
 from api.exceptions import TariffNotSpecifiedException
 from api.request import DistanceAndDuration
 
@@ -332,11 +333,28 @@ class Tariff(models.Model):
         ('usd', 'Доллар'),
         ('cny', 'Юани'),
     )
+    TYPES = (
+        ('basic', 'Основной'),
+        ('commission', 'Комиссионный'),
+        ('company', 'Для компании'),
+    )
 
     title = models.CharField(
         _('Название'), max_length=128,
         null=True, blank=True,
-        unique=True
+    )
+    type = models.CharField(
+        _('Тип'), max_length=32,
+        choices=TYPES, default="Основной"
+    )
+    commission = models.IntegerField(
+        _('Комиссия'),
+        null=True, blank=True
+    )
+    company = models.ForeignKey(
+        Company, models.CASCADE,
+        verbose_name=_('Компания'),
+        null=True, blank=True
     )
     city: City = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('Город'),
@@ -367,9 +385,6 @@ class Tariff(models.Model):
     is_available = models.BooleanField(
         _('Доступен?'), default=False
     )
-    is_commission = models.BooleanField(
-        _('Комиссионный?'), default=False
-    )
     lifetime = models.DateTimeField(
         _('Срок жизни'), default=tariff_derault_timelife
     )
@@ -380,17 +395,30 @@ class Tariff(models.Model):
         verbose_name_plural = "Тарифы"
 
     def __str__(self) -> str:
-        return f"{self.pk}: {self.city.city}, {self.title}, Комиссионный: {self.is_commission}"
+        return f"{self.pk}: {self.title}"
 
     def save(self, *args, **kwargs):
         self._set_intercity_tariff()
         self._set_hub_prices()
+        self._generate_title()
 
         super().save(*args, **kwargs)
 
         self._set_default_services()
 
         return self
+
+    def _generate_title(self):
+        type_ = list(filter(lambda x: x[0] == self.type, self.TYPES))[0][1]
+
+        if self.type == "basic":
+            self.title = f"{self.city.city} {type_}"
+
+        if self.type == "commission":
+            self.title = f"{self.city.city} {type_} {self.commission}%"
+
+        if self.type == "company":
+            self.title = f"{self.city.city} {self.company.name}"
 
     def delete(self, *args, **kwargs):
 
@@ -451,5 +479,3 @@ def func(sender, instance, **kwargs):
     city_to_price.minutes_duration = res[2]
 
     city_to_price.save()
-
-# @receiver()

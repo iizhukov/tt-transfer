@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from api.address.serializers import CitySerializer
 from api.cars.models import CAR_CLASSES
+from api.profile.serializers import CompanySerializer
 from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff, IntercityTariff,
@@ -33,7 +34,7 @@ class ServiceToPriceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceToPrice
-        fields = ('title', 'slug', 'prices', )
+        fields = ('title', 'slug', 'prices',)
         depth = 1
 
     def to_representation(self, instance):
@@ -138,11 +139,15 @@ class TariffSerializer(serializers.ModelSerializer):
     intracity_tariff = IntracityTariffSerializer(read_only=True)
     intercity_tariff = IntercityTariffSerializer(read_only=True)
 
+    title = serializers.CharField(read_only=True)
+    commission = serializers.IntegerField(allow_null=True)
+    company = CompanySerializer(allow_null=True)
+
     class Meta:
         model = Tariff
         fields = (
             'id', 'title', 'city', 'currency', 'comments',
-            'is_commission', 'services',
+            'type', 'commission', 'company', 'services',
             'intracity_tariff', 'intercity_tariff',
             'lifetime',
         )
@@ -152,11 +157,15 @@ class TariffSerializer(serializers.ModelSerializer):
 class SimpleTariffSerializer(serializers.ModelSerializer):
     city = CitySerializer()
 
+    title = serializers.CharField(read_only=True)
+    commission = serializers.IntegerField(allow_null=True)
+    company = CompanySerializer(allow_null=True)
+
     class Meta:
         model = Tariff
         fields = (
             'id', 'title', 'city', 'currency', 'comments',
-            'is_commission', 'lifetime'
+            'type', 'commission', 'company', 'lifetime'
         )
         depth = 1
 

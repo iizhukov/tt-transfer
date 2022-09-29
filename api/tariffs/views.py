@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
 from api.address.models import City, GlobalAddress
+from api.profile.models import Company
 from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff,
@@ -78,10 +79,11 @@ class TariffView(APIView, BasicPagination):
         return response
 
     def post(self, request: Request):
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=request.data.get("region"),
             city=request.data.get("city")
-        )[0]
+        )
 
         serializer = self.serializer_class(
             data={
@@ -89,7 +91,15 @@ class TariffView(APIView, BasicPagination):
             }
         )
         serializer.is_valid(raise_exception=True)
-        tariff = serializer.save(city=city)
+
+        if request.data.get("type") == "company":
+            company = get_object_or_404(
+                Company,
+                pk=request.data.get("company")
+            )
+            tariff = serializer.save(city=city, company=company)
+        else:
+            tariff = serializer.save(city=city)
 
         short_tariff_serializer = SimpleTariffSerializer(
             tariff
