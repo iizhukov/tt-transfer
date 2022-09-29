@@ -19,6 +19,8 @@ class Filter:
     def _search(fields, records, query_params):
         answer = []
 
+        print(fields)
+
         if "region" in fields:
             records = Filter._search_city(
                 records,
@@ -87,7 +89,7 @@ class Filter:
             if field.name in query_params
         ]
 
-        if "city" in fields:
+        if "region" in query_params:
             fields.append("region")
 
         return fields
