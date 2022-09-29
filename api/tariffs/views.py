@@ -92,6 +92,17 @@ class TariffView(APIView, BasicPagination):
         )
         serializer.is_valid(raise_exception=True)
 
+        if Tariff.objects.filter(
+                city=city,
+                type=serializer.data.get("type")
+        ):
+            return Response(
+                {
+                    "detail": "Такой тариф уже существует"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
         if request.data.get("type") == "company":
             company = get_object_or_404(
                 Company,
