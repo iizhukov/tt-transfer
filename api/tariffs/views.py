@@ -94,7 +94,8 @@ class TariffView(APIView, BasicPagination):
 
         if Tariff.objects.filter(
                 city=city,
-                type=serializer.data.get("type")
+                type=serializer.validated_data.get("type"),
+                commission=serializer.validated_data.get("commission")
         ):
             return Response(
                 {
