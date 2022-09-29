@@ -342,6 +342,7 @@ class Tariff(models.Model):
     title = models.CharField(
         _('Название'), max_length=128,
         null=True, blank=True,
+        unique=True
     )
     type = models.CharField(
         _('Тип'), max_length=32,
