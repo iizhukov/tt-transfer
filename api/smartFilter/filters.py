@@ -32,7 +32,7 @@ class Filter:
             fields.remove("city")
 
         if not fields:
-            return records
+            return records[::-1]
 
         for field in fields:
             for record in records:
