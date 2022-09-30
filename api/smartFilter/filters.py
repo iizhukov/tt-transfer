@@ -41,6 +41,15 @@ class Filter:
                 in_model = getattr(record, field)
                 in_params = query_params.get(field, "")
 
+                print(in_model, in_params)
+
+                if type(in_model) == bool and in_params.lower() in ("true", "false"):
+                    in_params = True if in_params.lower() in "true" else False
+
+                    if in_model == in_params:
+                        answer.append((record, 100))
+                    continue
+
                 coincidence = fuzz.ratio(
                     in_model,
                     in_params
@@ -86,7 +95,7 @@ class Filter:
         fields = [
             field.name
             for field in model._meta.get_fields()
-            if field.name in query_params
+            if field.name in query_params and query_params.get(field.name, None)
         ]
 
         if "region" in query_params:
