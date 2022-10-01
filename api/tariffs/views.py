@@ -404,7 +404,7 @@ class ExportTariffView(APIView):
     permission_classes = (IsManagerOrAdminUser,)
 
     def get(self, request: Request):
-        filename = TariffToExcel.export(Tariff.objects.all())
+        filename = TariffToExcel.export(Tariff.objects.all().order_by("-id"))
         url = Path(
             settings.EXCEL_ROOT,
             "tariffs/",
