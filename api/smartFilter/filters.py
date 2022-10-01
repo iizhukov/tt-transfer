@@ -41,11 +41,11 @@ class Filter:
                 in_model = getattr(record, field)
                 in_params = query_params.get(field).lower()
 
-                if not in_model or not in_params:
+                if in_model is None or in_params is None:
                     continue
 
-                if type(in_model) is bool and in_params in ("true", "false"):
-                    in_params = True if in_params == "true" else False if in_model == "false" else in_params
+                if type(in_model) is bool:
+                    in_params = True if in_params == "true" else False if in_params == "false" else in_params
 
                     if in_model != in_params:
                         break
@@ -61,6 +61,8 @@ class Filter:
 
                 if coincidence_ < 50:
                     break
+
+                coincidence = coincidence_
             else:
                 answer.append((record, coincidence))
 
