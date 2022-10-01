@@ -10,7 +10,7 @@ from api.address.models import City
 class Filter:
     @staticmethod
     def tariffs(query_params: dict):
-        tariffs = Tariff.objects.all().order_by("-id")
+        tariffs = Tariff.objects.all().order_by("last_update")
         fields = Filter._get_fields(Tariff, query_params)
 
         return Filter._search_tariff(fields, tariffs, query_params)
