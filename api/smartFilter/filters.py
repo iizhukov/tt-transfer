@@ -13,13 +13,14 @@ class Filter:
         tariffs = Tariff.objects.all()
         fields = Filter._get_fields(Tariff, query_params)
 
-        return Filter._search(fields, tariffs, query_params)
+        return Filter._search_tariff(fields, tariffs, query_params)
 
     @staticmethod
-    def _search(fields, records, query_params):
+    def _search_tariff(fields, records, query_params):
         answer = []
 
-        print(fields)
+        if not fields:
+            return records[::-1]
 
         if "region" in fields:
             records = Filter._search_city(
@@ -33,33 +34,31 @@ class Filter:
         if "city" in fields:
             fields.remove("city")
 
-        if not fields:
-            return records[::-1]
+        for record in records:
+            coincidence = 0
 
-        for field in fields:
-            for record in records:
-                in_model = getattr(record, field)
-                in_params = query_params.get(field, "")
+            for field in fields:
+                in_model = getattr(record, field).lower()
+                in_params = query_params.get(field).lower()
 
-                print(in_model, in_params)
-
-                if type(in_model) == bool and in_params.lower() in ("true", "false"):
-                    in_params = True if in_params.lower() in "true" else False
-
-                    if in_model == in_params:
-                        answer.append((record, 100))
+                if not in_model or not in_params:
                     continue
 
-                coincidence = fuzz.ratio(
+                if type(in_model) is bool or in_params in ("true", "false"):
+                    in_params = True if in_params == "true" else False if in_model == "false" else in_params
+
+                    if in_model != in_params:
+                        break
+
+                coincidence_ = fuzz.ratio(
                     in_model,
                     in_params
                 )
 
-                if in_params == in_model:
-                    answer.append((record, 100))
-
-                elif coincidence >= 50 or in_params in in_model:
-                    answer.append((record, coincidence))
+                if coincidence_ < 50:
+                    break
+            else:
+                answer.append((record, coincidence))
 
         answer.sort(key=lambda x: x[1])
 
