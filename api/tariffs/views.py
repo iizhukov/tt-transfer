@@ -49,6 +49,20 @@ class BasicPagination(PageNumberPagination):
         })
 
 
+class SetLastUpdateTariff(APIView):
+    def get(self, request, tariff_id: int):
+        tariff = get_object_or_404(
+            Tariff,
+            pk=tariff_id
+        )
+        tariff.save()
+
+        return Response(
+            {},
+            status.HTTP_200_OK
+        )
+
+
 class TariffView(APIView, BasicPagination):
     serializer_class = TariffSerializer
 
