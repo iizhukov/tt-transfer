@@ -416,5 +416,5 @@ class ExportTariffView(APIView):
                 excel.read(),
                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-            response['Content-Disposition'] = f'attachment; filename={filename}'
+            response['filename'] = filename
             return response
