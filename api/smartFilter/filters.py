@@ -38,17 +38,21 @@ class Filter:
             coincidence = 0
 
             for field in fields:
-                in_model = getattr(record, field).lower()
+                in_model = getattr(record, field)
                 in_params = query_params.get(field).lower()
 
                 if not in_model or not in_params:
                     continue
 
-                if type(in_model) is bool or in_params in ("true", "false"):
+                if type(in_model) is bool and in_params in ("true", "false"):
                     in_params = True if in_params == "true" else False if in_model == "false" else in_params
 
                     if in_model != in_params:
                         break
+                    else:
+                        continue
+
+                in_model = in_model.lower()
 
                 coincidence_ = fuzz.ratio(
                     in_model,
