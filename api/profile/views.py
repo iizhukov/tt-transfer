@@ -39,6 +39,7 @@ class ChangePasswordView(APIView):
 
 class EditUserView(APIView):
     serializer_class = UserEditSerializer
+
     # permission_classes = (AllowAny, )
 
     def post(self, request):
@@ -67,6 +68,7 @@ class EditUserView(APIView):
 class UserAvatarView(APIView):
     serializer_class = AvatarSerializer
     parser_classes = (MultiPartParser, FormParser)
+
     # permission_classes = (AllowAny, )
 
     def post(self, request, format=None):
@@ -96,12 +98,13 @@ class UserAvatarView(APIView):
 class UserDocumentsView(APIView):
     serializer_class = DocumentSerializer
     parser_classes = (MultiPartParser, FormParser)
+
     # permission_classes = (AllowAny, )
 
     def get(self, request):
         docs = UserDocument.objects.filter(user=request.user)
         # docs = UserDocument.objects.filter(user=User.objects.get(email="zxc@zxc.zxc"))
-        return Response({"documents": [doc.document.url for doc in docs] }, status=status.HTTP_200_OK)
+        return Response({"documents": [doc.document.url for doc in docs]}, status=status.HTTP_200_OK)
 
     def post(self, request):
         for file in request.FILES.getlist("documents"):
@@ -120,7 +123,7 @@ class UserDocumentsView(APIView):
 
         for doc in UserDocument.objects.filter(user=request.user):
             documents.append(doc.document.url)
-            
+
         return Response({"documents": documents}, status=status.HTTP_200_OK)
 
 
@@ -139,6 +142,7 @@ class UserListView(ListAPIView):
 
 class CompanyView(APIView):
     serializer_class = CompanySerializer
+
     # permission_classes = (AllowAny, )
 
     def get(self, request):
@@ -159,11 +163,12 @@ class CompanyView(APIView):
             data=request.data
         )
 
-        city, _ = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=request.data.get("region"),
             city=request.data.get("city")
         )
-    
+
         address, _ = Address.objects.get_or_create(
             city=city,
             street=request.data.get("street"),
@@ -175,7 +180,7 @@ class CompanyView(APIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer.save(
             user=request.user,
             address=address
@@ -227,7 +232,7 @@ class CompanyView(APIView):
                 serializer.errors,
                 status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer.save(
             address=address
         )
@@ -236,4 +241,3 @@ class CompanyView(APIView):
             serializer.data,
             status.HTTP_200_OK
         )
- 

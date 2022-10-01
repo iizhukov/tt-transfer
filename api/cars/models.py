@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-
 # class CarClass(models.Model):
 #     name = models.CharField(
 #         _("Название"), max_length=64,
@@ -11,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 #         db_table = "car_class"
 #         verbose_name = "Класс автомобиля"
 #         verbose_name_plural = "Классы автомобилей"
-    
+
 #     def __str__(self) -> str:
 #         return str(self.name)
 
@@ -70,11 +69,13 @@ class Car(models.Model):
         default="spare"
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "car"
         verbose_name = "Автомобиль"
         verbose_name_plural = "Автомобили"
-    
+
     def __str__(self) -> str:
         return f"{self.brand} {self.model}"
 

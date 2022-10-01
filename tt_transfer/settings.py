@@ -276,4 +276,7 @@ PROJECT_URL = "\\".join(BASE_DIR.split("\\")[:-1])
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
+EXCEL_URL = os.path.join('/media/excel/')
+EXCEL_ROOT = os.path.join(MEDIA_ROOT, "excel/")
+
 # FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, "temp\\")

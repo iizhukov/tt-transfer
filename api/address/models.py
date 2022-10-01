@@ -8,7 +8,6 @@ from slugify import slugify
 from api.cars.models import CAR_CLASSES
 from api.request import GetCoordsByAddress
 
-
 ZONE_COLORS = (
     ('red', 'Красная'),
     ('green', 'Зеленая'),
@@ -35,11 +34,13 @@ class City(models.Model):
         null=True, blank=True
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "address_city"
         verbose_name = "Город"
         verbose_name_plural = "Города"
-    
+
     def __str__(self) -> str:
         return f"{self.country}, {self.region}, {self.city}"
 
@@ -80,6 +81,8 @@ class AbstractAddressModel(models.Model):
         null=True, blank=True,
     )
 
+    objects = models.Manager()
+
     class Meta:
         abstract = True
 
@@ -104,10 +107,9 @@ class Address(AbstractAddressModel):
         db_table = "address"
         verbose_name = "Адрес"
         verbose_name_plural = "Адреса"
-    
+
     def __str__(self) -> str:
         return self.model_as_raw()
-
 
     def save(self, *args, **kwargs):
         self.coordinate = self._get_coords_from_request()
@@ -179,6 +181,8 @@ class Coordinate(models.Model):
         _('Долгота')
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "city_zone_coordinate"
         verbose_name = "Координата"
@@ -207,6 +211,8 @@ class CityZone(models.Model):
     coordinates = models.ManyToManyField(
         Coordinate,
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "city_zone"
@@ -238,6 +244,8 @@ class HubZone(models.Model):
     coordinates: List[Coordinate] = models.ManyToManyField(
         Coordinate,
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "hub_zone"

@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from api.address.models import Address, City
 from api.cars.models import Car
 
-
 STATUSES = (
     ('constant', 'Постоянный'),
     ('default', 'Обычный')
@@ -16,6 +15,8 @@ class Manager(models.Model):
     user = models.OneToOneField(
         "authentication.User", models.CASCADE, verbose_name=_('Пользователь')
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "manager"
@@ -31,6 +32,8 @@ class EmployeeModel(models.Model):
         "authentication.User", models.CASCADE, verbose_name=_('Пользователь')
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "employee"
         verbose_name = "Сотрудник"
@@ -44,6 +47,8 @@ class Admin(models.Model):
     user = models.OneToOneField(
         "authentication.User", models.CASCADE, verbose_name=_('Пользователь')
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "admin"
@@ -79,6 +84,8 @@ class Driver(models.Model):
         default="busy"
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "driver"
         verbose_name = "Водитель"
@@ -95,6 +102,8 @@ class BankModel(models.Model):
     bic = models.CharField(
         _('БИК'), max_length=9
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "bank"
@@ -117,11 +126,13 @@ class Client(models.Model):
         _('Финансовый оборот'), default=0,
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = 'client'
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
-    
+
     def __str__(self) -> str:
         return f"{self.user.name} {self.user.surname} - {self.financial_turnover} р."
 
@@ -170,6 +181,7 @@ class Company(models.Model):
         _('Подтвержден'), default=False,
     )
 
+    objects = models.Manager()
 
     class Meta:
         db_table = 'company'

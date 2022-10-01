@@ -35,6 +35,8 @@ class OrderDetailModel(models.Model):
         null=True, blank=True, default=None
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "order_detail"
         verbose_name = "Детали заказа"
@@ -53,7 +55,7 @@ class Order(models.Model):
         Address, models.CASCADE, verbose_name=_('В'),
         related_name="to"
     )
-    
+
     car_class = models.CharField(
         _('Класс автомобиля'), choices=CAR_CLASSES, max_length=24,
     )
@@ -79,6 +81,8 @@ class Order(models.Model):
     price = models.IntegerField(
         _('Цена'), blank=True, default=None
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "orders"

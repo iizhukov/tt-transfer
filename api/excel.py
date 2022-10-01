@@ -2,19 +2,17 @@ from openpyxl import Workbook
 import openpyxl
 from api.tariffs.models import Tariff
 from django.conf import settings, Path
+from django.utils import timezone
 
 PATH = Path(settings.BASE_DIR, "api/excel_snippets/")
-
-
-# PATH = "excel_snippets/tariff_snippet.xlsx"
 
 
 class TariffToExcel:
     @staticmethod
     def export(tariffs):
         wb_snippet = openpyxl.load_workbook(Path(PATH, "tariff_snippet.xlsx"))
-        # wb_snippet = openpyxl.load_workbook(PATH)
         sheet_snippet = wb_snippet.active
+
         snippet = [i.value for i in list(sheet_snippet.rows)[2]]
         ru_snippet = ["ID", "Название", "Регион", "Город", "Активен?", None, None]
 
@@ -35,12 +33,11 @@ class TariffToExcel:
 
                     sheet.cell(row=row, column=col).value = attr
 
-        for row in sheet.rows:
-            print([cell.value for cell in row])
+        title = timezone.now().strftime('%H:%M:%d_%m_%Y')
+        wb.save(Path(settings.EXCEL_ROOT, f"tariffs/{title}_tariff.xlsx"))
 
-        wb.save("test.xlsx")
+        return f"{title}_tariff.xlsx"
 
 
-TariffToExcel.export(Tariff.objects.all())
 if __name__ == "__main__":
     TariffToExcel.export(Tariff.objects.all())

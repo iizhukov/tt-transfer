@@ -3,11 +3,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from django.conf import settings, Path
 from django.shortcuts import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
 from api.address.models import City, GlobalAddress
 from api.profile.models import Company
+from api.permissions import IsManagerOrAdminUser
 from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff,
@@ -24,6 +26,7 @@ from api.address.serializers import (
     CitySerializer, GlobalAddressSerializer
 )
 from api.smartFilter.filters import Filter
+from api.excel import TariffToExcel
 
 SERVICES = [
     *DEFAULT_SERVICES_LIST,
@@ -393,4 +396,22 @@ class EditTariffPricesView(APIView):
         return Response(
             serializer.data,
             status.HTTP_201_CREATED
+        )
+
+
+class ExportTariffView(APIView):
+    permission_classes = (IsManagerOrAdminUser,)
+
+    def get(self, request: Request):
+        url = Path(
+            settings.EXCEL_URL,
+            "tariffs/",
+            TariffToExcel.export(Tariff.objects.all())
+        )
+
+        return Response(
+            {
+                "url": str(url)
+            },
+            status.HTTP_200_OK
         )

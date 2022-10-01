@@ -78,7 +78,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_online = models.BooleanField(
         _('Онлайн'), default=False
     )
-    
+
     is_staff = models.BooleanField(_("Сотрудник"), default=False)
     is_active = models.BooleanField(
         _("Активный"), default=True, help_text=_("Включено, когда аккаунт не в бане")
@@ -119,6 +119,8 @@ class ResetPasswordCode(models.Model):
         _('Дата окончания действия'),
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "reset_password_code"
         verbose_name = "Код сброса пароля"
@@ -136,6 +138,8 @@ class UserDocument(models.Model):
     document = models.FileField(
         _('Документ'), upload_to="documents/"
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "user_document"

@@ -2,7 +2,6 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     path('services/', views.GetServicesView.as_view(), name="get_services"),
     path('edit-prices/<int:tariff_id>/', views.EditTariffPricesView.as_view(), name="edit_tariff_prices"),
@@ -11,8 +10,14 @@ urlpatterns = [
     path('tariff/', views.TariffView.as_view(), name="tariff"),
     path('tariff/<int:tariff_id>/', views.TariffView.as_view(), name="tariff_by_id"),
 
-    path('tariff/<int:tariff_id>/intercity/city/', views.AddLocationToTariff.as_view(location="city"), name="add_city_to_tariff"),
-    path('tariff/<int:tariff_id>/intercity/global-address/', views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
-    path('tariff/<int:tariff_id>/intercity/city/<int:location_id>/', views.AddLocationToTariff.as_view(location="city"), name="add_city_to_tariff"),
-    path('tariff/<int:tariff_id>/intercity/global-address/<int:location_id>/', views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
+    path('export-tariffs/', views.ExportTariffView.as_view(), name="export_tariffs"),
+
+    path('tariff/<int:tariff_id>/intercity/city/', views.AddLocationToTariff.as_view(location="city"),
+         name="add_city_to_tariff"),
+    path('tariff/<int:tariff_id>/intercity/global-address/',
+         views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
+    path('tariff/<int:tariff_id>/intercity/city/<int:location_id>/', views.AddLocationToTariff.as_view(location="city"),
+         name="add_city_to_tariff"),
+    path('tariff/<int:tariff_id>/intercity/global-address/<int:location_id>/',
+         views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
 ]

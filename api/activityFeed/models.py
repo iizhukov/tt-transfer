@@ -54,6 +54,8 @@ class ImageModel(models.Model):
         default=None
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "news_image"
         verbose_name = "Изображение"
@@ -88,6 +90,8 @@ class FileModel(models.Model):
         "News", models.CASCADE,
         default=None
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "news_file"
@@ -143,6 +147,8 @@ class News(models.Model):
         _('Категория'), choices=CATEGORIES,
         max_length=16, default=_("for_all"),
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = 'news'

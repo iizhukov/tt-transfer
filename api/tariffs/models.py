@@ -67,6 +67,8 @@ class PriceToCarClass(models.Model):
         _('Цена водителя'), default=0
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "car_zone_price2car_class"
         verbose_name = "Цена к классу авто"
@@ -89,6 +91,8 @@ class ServiceToPrice(models.Model):
         PriceToCarClass, verbose_name=_('Услуга к цене'),
         blank=True
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "service_to_price"
@@ -131,6 +135,8 @@ class AdditionalHubZoneToPrice(models.Model):
         PriceToCarClass, verbose_name=_('Цены к зоне'),
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "additional_hubzone_to_price"
         verbose_name = "Зона хаба к ценам"
@@ -168,6 +174,8 @@ class HubToPrice(models.Model):
     additional_hubzone_prices = models.ManyToManyField(
         AdditionalHubZoneToPrice, verbose_name=_('Добавочная стоимость к зонам хаба')
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "hub_to_price"
@@ -215,6 +223,8 @@ class IntracityTariff(models.Model):
         HubToPrice, verbose_name=_('Цены к зонам')
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "intracity_tariff"
         verbose_name = "Внутригородской тариф"
@@ -250,6 +260,8 @@ class AbstractLocationToPrice(models.Model):
     prices = models.ManyToManyField(
         PriceToCarClass, blank=True
     )
+
+    objects = models.Manager()
 
     class Meta:
         abstract = True
@@ -316,6 +328,8 @@ class IntercityTariff(models.Model):
         GlobalAddressToPrice, verbose_name=_('В глобальные адреса'),
         blank=True
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "intercity_tariff"
@@ -389,6 +403,8 @@ class Tariff(models.Model):
     lifetime = models.DateTimeField(
         _('Срок жизни'), default=tariff_derault_timelife
     )
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "tariff"
