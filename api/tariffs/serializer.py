@@ -139,8 +139,8 @@ class TariffSerializer(serializers.ModelSerializer):
     intercity_tariff = IntercityTariffSerializer(read_only=True)
 
     title = serializers.CharField(read_only=True)
-    commission = serializers.IntegerField(allow_null=True, default=None)
-    company = CompanySerializer(allow_null=True, default=None)
+    commission = serializers.IntegerField(allow_null=True, required=False)
+    company = CompanySerializer(allow_null=True, required=False)
 
     class Meta:
         model = Tariff

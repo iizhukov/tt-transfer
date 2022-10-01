@@ -403,6 +403,9 @@ class Tariff(models.Model):
     lifetime = models.DateTimeField(
         _('Срок жизни'), default=tariff_derault_timelife
     )
+    last_update = models.DateTimeField(
+        _('Последнее изменение'), default=timezone.now
+    )
 
     objects = models.Manager()
 
@@ -418,12 +421,16 @@ class Tariff(models.Model):
         self._set_intercity_tariff()
         self._set_hub_prices()
         self._generate_title()
+        self._set_last_update()
 
         super().save(*args, **kwargs)
 
         self._set_default_services()
 
         return self
+
+    def _set_last_update(self):
+        self.last_update = timezone.now()
 
     def _generate_title(self):
         type_ = list(filter(lambda x: x[0] == self.type, self.TYPES))[0][1]
