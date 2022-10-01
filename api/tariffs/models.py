@@ -449,15 +449,16 @@ class Tariff(models.Model):
         return super().delete(*args, **kwargs)
 
     def _set_default_services(self):
-        for service in [
-            *DEFAULT_SERVICES_LIST,
-            *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
-        ]:
-            service_ = ServiceToPrice.objects.create(
-                title=service[0],
-                slug=service[1]
-            )
-            self.services.add(service_)
+        if not self.services:
+            for service in [
+                *DEFAULT_SERVICES_LIST,
+                *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
+            ]:
+                service_ = ServiceToPrice.objects.create(
+                    title=service[0],
+                    slug=service[1]
+                )
+                self.services.add(service_)
 
     def _set_hub_prices(self, hubs=None):
         intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
@@ -495,8 +496,6 @@ def func(sender, instance, **kwargs):
         tariff_city.get_center_as_string(),
         city_to_price.city.get_center_as_string()
     )
-
-    print(res)
 
     city_to_price.distance = res[0]
     city_to_price.hours_duration = res[1]

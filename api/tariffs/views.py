@@ -175,7 +175,7 @@ class PriceToCarClassView(APIView):
         if isinstance(pk, int):
             return self.put_by_id(request, pk)
         else:
-            return self.put_many(request, pk)
+            return self.put_many(request)
 
     def put_by_id(self, request: Request, pk: int):
         serializer = self.serializer_class(

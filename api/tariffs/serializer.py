@@ -146,7 +146,7 @@ class TariffSerializer(serializers.ModelSerializer):
         model = Tariff
         fields = (
             'id', 'title', 'city', 'currency', 'comments', 'is_available',
-            'type', 'commission', 'company', 'services',
+            'type', 'commission', 'company', 'services', 'last_update',
             'intracity_tariff', 'intercity_tariff',
             'lifetime',
         )
@@ -164,6 +164,6 @@ class SimpleTariffSerializer(serializers.ModelSerializer):
         model = Tariff
         fields = (
             'id', 'title', 'city', 'currency', 'comments', 'is_available',
-            'type', 'commission', 'company', 'lifetime'
+            'type', 'commission', 'company', 'lifetime', 'last_update',
         )
         depth = 1
