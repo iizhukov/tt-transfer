@@ -3,9 +3,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+from django.http import FileResponse
 from django.conf import settings, Path
 from django.shortcuts import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 
 from api.address.models import City, GlobalAddress
 from api.profile.models import Company
@@ -404,14 +405,10 @@ class ExportTariffView(APIView):
 
     def get(self, request: Request):
         url = Path(
-            settings.EXCEL_URL,
+            settings.EXCEL_ROOT,
             "tariffs/",
             TariffToExcel.export(Tariff.objects.all())
         )
 
-        return Response(
-            {
-                "url": str(url)
-            },
-            status.HTTP_200_OK
-        )
+        with open(url, "rb") as file:
+            return FileResponse(file.read())
