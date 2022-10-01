@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
-from django.http import FileResponse
+from django.http import HttpResponse
 from django.conf import settings, Path
 from django.shortcuts import get_object_or_404
 
@@ -404,11 +404,17 @@ class ExportTariffView(APIView):
     permission_classes = (IsManagerOrAdminUser,)
 
     def get(self, request: Request):
+        filename = TariffToExcel.export(Tariff.objects.all())
         url = Path(
             settings.EXCEL_ROOT,
             "tariffs/",
-            TariffToExcel.export(Tariff.objects.all())
+            filename
         )
 
-        with open(url, "rb") as file:
-            return FileResponse(file.read())
+        with open(url, "rb") as excel:
+            response = HttpResponse(
+                excel.read(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+            return response
