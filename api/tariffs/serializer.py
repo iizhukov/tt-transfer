@@ -7,7 +7,6 @@ from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff, IntercityTariff,
     HubToPrice, CityToPrice, GlobalAddressToPrice,
-    CityToPrice, GlobalAddressToPrice,
     AdditionalHubZoneToPrice
 )
 
@@ -140,8 +139,8 @@ class TariffSerializer(serializers.ModelSerializer):
     intercity_tariff = IntercityTariffSerializer(read_only=True)
 
     title = serializers.CharField(read_only=True)
-    commission = serializers.IntegerField(allow_null=True)
-    company = CompanySerializer(allow_null=True)
+    commission = serializers.IntegerField(allow_null=True, default=None)
+    company = CompanySerializer(allow_null=True, default=None)
 
     class Meta:
         model = Tariff
@@ -168,15 +167,3 @@ class SimpleTariffSerializer(serializers.ModelSerializer):
             'type', 'commission', 'company', 'lifetime'
         )
         depth = 1
-
-
-class CityToPriceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CityToPrice
-        fields = "__all__"
-
-
-class GlobalAddressToPriceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GlobalAddressToPrice
-        fields = "__all__"

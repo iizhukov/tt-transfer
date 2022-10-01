@@ -22,7 +22,7 @@ from .serializers import (
 
 
 class CreateUserView(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         user_sample = {
@@ -60,7 +60,7 @@ class CreateUserView(APIView):
 
 
 class UserLogoutView(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         response = Response(status=status.HTTP_200_OK)
@@ -76,7 +76,7 @@ class UserLogoutView(APIView):
 
 class ResetPasswordGetCodeView(APIView):
     serializer_class = UserEmailSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         if "email" in request.data:
@@ -90,7 +90,7 @@ class ResetPasswordGetCodeView(APIView):
                 code.save()
                 print(code)
 
-                mail = SendCode((email, ))
+                mail = SendCode((email,))
                 mail.send_code(code.code)
 
                 return Response({"detail": "Письмо отправлено с кодом отправлено"}, status=status.HTTP_200_OK)
@@ -101,7 +101,7 @@ class ResetPasswordGetCodeView(APIView):
 
 class ResetPasswordCheckCodeView(APIView):
     serializer_class = CodeCodeSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         if "code" in request.data:
@@ -122,7 +122,7 @@ class ResetPasswordCheckCodeView(APIView):
 
 class ResetPasswordView(APIView):
     serializer_class = ResetPasswordSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -152,7 +152,7 @@ class ResetPasswordView(APIView):
 
 
 class IsAuthView(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         if request.user.is_authenticated:
@@ -169,7 +169,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                 secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
             )
             # del response.data['refresh']
 
@@ -190,9 +189,9 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
 class CookieTokenRefreshView(TokenRefreshView):
     serializer_class = CookieTokenRefreshSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
-    def finalize_response(self, request, response, *args, **kwargs):
+    def finalize_response(self, request, response: Response, *args, **kwargs):
         if response.data.get("refresh"):
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
@@ -200,7 +199,8 @@ class CookieTokenRefreshView(TokenRefreshView):
                 expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                 secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+                domain=settings.SIMPLE_JWT['AUTH_COOKIE_DOMAIN']
             )
             # del response.data["refresh"]
 
@@ -219,7 +219,6 @@ class CookieTokenRefreshView(TokenRefreshView):
             print(access)
 
         return super().finalize_response(request, response, *args, **kwargs)
-
 
 # def get_tokens_for_user(user):
 #     refresh = RefreshToken.for_user(user)

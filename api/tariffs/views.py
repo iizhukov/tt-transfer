@@ -48,7 +48,7 @@ class BasicPagination(PageNumberPagination):
 class TariffView(APIView, BasicPagination):
     serializer_class = TariffSerializer
 
-    def get(self, request: Request, tariff_id: int | None = None):
+    def get(self, request: Request, tariff_id: int = None):
         if tariff_id:
             return self.get_by_id(request, tariff_id)
         else:
@@ -167,7 +167,7 @@ class TariffView(APIView, BasicPagination):
 class PriceToCarClassView(APIView):
     serializer_class = PriceToCarClassSerializer
 
-    def pust(self, request: Request, pk: int | None = None):
+    def pust(self, request: Request, pk: int = None):
         if isinstance(pk, int):
             return self.put_by_id(request, pk)
         else:

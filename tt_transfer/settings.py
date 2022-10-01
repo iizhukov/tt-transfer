@@ -1,10 +1,8 @@
 import os
 from datetime import timedelta
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -171,11 +169,12 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=30),
 
     'AUTH_COOKIE': 'refresh_token',
-    'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
-    'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
-    'AUTH_COOKIE_HTTP_ONLY': True, # Http only cookie flag.It's not fetch by javascript.
-    'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
-    'AUTH_COOKIE_SAMESITE': "Lax",  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
+    'AUTH_COOKIE_DOMAIN': None,  # A string like "example.com", or None for standard domain cookie.
+    'AUTH_COOKIE_SECURE': False,  # Whether the auth cookies should be secure (https:// only).
+    'AUTH_COOKIE_HTTP_ONLY': True,  # Http only cookie flag.It's not fetch by javascript.
+    'AUTH_COOKIE_PATH': '/',  # The path of the auth cookie.
+    'AUTH_COOKIE_SAMESITE': "Lax",
+    # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
 }
 
 # CORS_ALLOWED_ORIGINS = [
@@ -209,6 +208,7 @@ CORS_ALLOW_HEADERS = [
     "Content-Disposition",
     'name',
     "boundary",
+    "Set-Cookie",
 ]
 
 # CORS_ORIGIN_ALLOW_ALL = False
@@ -229,7 +229,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -248,7 +247,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -261,7 +259,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/

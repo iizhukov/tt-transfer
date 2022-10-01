@@ -98,7 +98,7 @@ class Filter:
             if field.name in query_params and query_params.get(field.name, None)
         ]
 
-        if "region" in query_params:
+        if "region" in query_params and query_params.get("region", None):
             fields.append("region")
 
         return fields
