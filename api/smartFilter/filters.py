@@ -35,7 +35,7 @@ class Filter:
             fields.remove("city")
 
         for record in records:
-            coincidence = 0
+            coincidence = 100
 
             for field in fields:
                 in_model = getattr(record, field)
