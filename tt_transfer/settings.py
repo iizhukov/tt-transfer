@@ -211,6 +211,10 @@ CORS_ALLOW_HEADERS = [
     "Set-Cookie",
 ]
 
+CORS_EXPOSE_HEADERS = [
+    "filename",
+]
+
 # CORS_ORIGIN_ALLOW_ALL = False
 
 # CORS_ORIGIN_WHITELIST = (
