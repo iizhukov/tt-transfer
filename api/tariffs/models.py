@@ -453,15 +453,16 @@ class Tariff(models.Model):
         return super().delete(*args, **kwargs)
 
     def _set_default_services(self):
-        for service in [
-            *DEFAULT_SERVICES_LIST,
-            *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
-        ]:
-            service_ = ServiceToPrice.objects.create(
-                title=service[0],
-                slug=service[1]
-            )
-            self.services.add(service_)
+        if not self.services.all():
+            for service in [
+                *DEFAULT_SERVICES_LIST,
+                *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
+            ]:
+                service_ = ServiceToPrice.objects.create(
+                    title=service[0],
+                    slug=service[1]
+                )
+                self.services.add(service_)
 
     def _set_hub_prices(self, hubs=None):
         intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
