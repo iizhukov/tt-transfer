@@ -437,28 +437,31 @@ class Tariff(models.Model):
 
         if self.type == "basic":
             self.title = f"{self.city.city} {type_}"
+            self.commission = None
+            self.company = None
 
         if self.type == "commission":
             self.title = f"{self.city.city} {type_} {self.commission}%"
+            self.company = None
 
         if self.type == "company":
             self.title = f"{self.city.city} {self.company.name}"
+            self.commission = None
 
     def delete(self, *args, **kwargs):
 
         return super().delete(*args, **kwargs)
 
     def _set_default_services(self):
-        if not self.services:
-            for service in [
-                *DEFAULT_SERVICES_LIST,
-                *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
-            ]:
-                service_ = ServiceToPrice.objects.create(
-                    title=service[0],
-                    slug=service[1]
-                )
-                self.services.add(service_)
+        for service in [
+            *DEFAULT_SERVICES_LIST,
+            *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
+        ]:
+            service_ = ServiceToPrice.objects.create(
+                title=service[0],
+                slug=service[1]
+            )
+            self.services.add(service_)
 
     def _set_hub_prices(self, hubs=None):
         intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()

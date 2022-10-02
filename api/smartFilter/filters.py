@@ -10,7 +10,7 @@ from api.address.models import City
 class Filter:
     @staticmethod
     def tariffs(query_params: dict):
-        tariffs = Tariff.objects.all().order_by("last_update")
+        tariffs = Tariff.objects.all().order_by("-last_update")
         fields = Filter._get_fields(Tariff, query_params)
 
         return Filter._search_tariff(fields, tariffs, query_params)
@@ -20,7 +20,7 @@ class Filter:
         answer = []
 
         if not fields:
-            return records[::-1]
+            return records
 
         if "region" in fields:
             records = Filter._search_city(
@@ -35,8 +35,6 @@ class Filter:
             fields.remove("city")
 
         for record in records:
-            coincidence = 100
-
             for field in fields:
                 in_model = getattr(record, field)
                 in_params = query_params.get(field).lower()
@@ -61,17 +59,10 @@ class Filter:
 
                 if coincidence_ < 50:
                     break
-
-                coincidence = coincidence_
             else:
-                answer.append((record, coincidence))
+                answer.append(record)
 
-        answer.sort(key=lambda x: x[1])
-
-        return list({
-            ans[0]
-            for ans in answer
-        })
+        return answer
 
     @staticmethod
     def _search_city(records: List[Model], region: str, city: str) -> list:
