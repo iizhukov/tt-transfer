@@ -527,3 +527,7 @@ def func(sender, instance, **kwargs):
         tariff.intercity_tariff.cities.add(
             new_city_to_price
         )
+
+        tariff.save()
+
+    instance.tariff.save()
