@@ -441,11 +441,19 @@ class ExportTariffView(APIView):
     permission_classes = (IsManagerOrAdminUser,)
 
     def get(self, request: Request):
-        tariffs_id = request.query_params.getlist("tariffs")
+        tariff_ids = request.query_params.getlist("tariffs")
 
-        filename = TariffToExcel.export(Tariff.objects.filter(
-            pk__in=tariffs_id
-        ).order_by("-id"))
+        filename = TariffToExcel.export(
+            (
+                Tariff.objects.filter(
+                    pk__in=tariff_ids
+                ).order_by("-id")
+
+                if tariff_ids else
+
+                Tariff.objects.all()
+            ).order_by("-id")
+        )
 
         url = Path(
             settings.EXCEL_ROOT,
