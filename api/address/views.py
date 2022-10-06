@@ -24,7 +24,6 @@ from .serializers import (
 from api.tariffs.models import Tariff, AdditionalHubZoneToPrice
 from api.request import DistanceAndDuration
 
-
 REGIONS = set(City.objects.values_list('region', flat=True))
 CITIES = {
     region: set(City.objects.filter(
@@ -60,7 +59,8 @@ class CityView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        city, created = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             city=serializer.data.get("city"),
             region=serializer.data.get("region")
         )
@@ -99,7 +99,7 @@ class AddAddressView(APIView):
                 {"detail": "Некорректные данные"},
                 status.HTTP_400_BAD_REQUEST
             )
-        
+
         city_serializer = CitySerializer(data=request.data)
         city_serializer.is_valid()
 
@@ -128,8 +128,8 @@ class AddAddressView(APIView):
 
 class ZonesView(APIView):
     serializer_class = CityZoneSerializer
-    permission_classes = (AllowAny, )
-    
+    permission_classes = (AllowAny,)
+
     def get(self, request: Request):
         city_ = request.query_params.get("city")
         region_ = request.query_params.get("region")
@@ -276,7 +276,7 @@ class GetZoneByCoordsView(APIView):
             region=serializer.data.get("region"),
             city=serializer.data.get("city")
         )
-    
+
         zones = CityZone.objects.filter(
             city=city
         )
@@ -285,7 +285,7 @@ class GetZoneByCoordsView(APIView):
             serializer.data.get("address_latitude"),
             serializer.data.get("address_longitude")
         )
-        
+
         for zone in zones:
             coords = []
 
@@ -305,7 +305,7 @@ class GetZoneByCoordsView(APIView):
                     zone_serializer.data,
                     status.HTTP_200_OK
                 )
-        
+
         return Response(
             {},
             status.HTTP_200_OK
@@ -317,10 +317,11 @@ class GetCityCenter(APIView):
         region_ = request.query_params.get("region")
         city_ = request.query_params.get("city")
 
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=region_,
             city=city_
-        )[0]
+        )
 
         latitude = city.center.latitude
         longitude = city.canter.longitude
@@ -336,7 +337,7 @@ class GetCityCenter(APIView):
 
 class HubView(APIView):
     serializer_class = HubSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def get(self, request: Request):
         region_ = request.query_params.get("region")
@@ -388,15 +389,16 @@ class HubView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
 
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=region_,
             city=city_
-        )[0]
+        )
 
-        coordinates = Coordinate.objects.get_or_create(
+        coordinates, _ = Coordinate.objects.get_or_create(
             latitude=lat,
             longitude=lon
-        )[0]
+        )
 
         serializer = self.serializer_class(
             data=request.data,
@@ -407,7 +409,7 @@ class HubView(APIView):
                 serializer.errors,
                 status.HTTP_400_BAD_REQUEST
             )
-        
+
         instance = serializer.save(city=city, coordinate=coordinates)
 
         self._add_to_tariff(city, instance)
@@ -590,7 +592,8 @@ class GlobalAddressView(APIView):
         )
 
     def post(self, request: Request):
-        city = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=request.data.get("region"),
             city=request.data.get("city")
         )
@@ -604,10 +607,11 @@ class GetDistanceAndDurationBetweenCitiesView(APIView):
         cities_: List[City] = []
         for i in range(len(regions)):
             cities_.append(
-                City.objects.get_or_create(
+                get_object_or_404(
+                    City,
                     region=regions[i],
                     city=cities[i]
-                )[0]
+                )
             )
 
         print(cities_)
@@ -693,7 +697,6 @@ class FilterCitiesView(APIView):
                     [city],
                     status.HTTP_200_OK
                 )
-
 
         response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
 

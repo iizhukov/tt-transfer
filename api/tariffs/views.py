@@ -21,7 +21,7 @@ from .models import (
 from .serializer import (
     IntracityTariffSerializer, TariffSerializer,
     SimpleTariffSerializer, PriceToCarClassSerializer,
-    CityToPriceSerializer, GlobalAddressToPriceSerializer
+    CityToPriceSerializer, GlobalAddressToPriceSerializer, IntercityTariffSerializer
 )
 from api.address.serializers import (
     CitySerializer, GlobalAddressSerializer
@@ -118,6 +118,17 @@ class TariffView(APIView, BasicPagination):
             return Response(
                 {
                     "detail": "Такой тариф уже существует"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        if serializer.validated_data.get("type") != "basic" and not Tariff.objects.filter(
+                city=city,
+                type="basic"
+        ):
+            return Response(
+                {
+                    "detail": "Нет основного тарифа для этого города"
                 },
                 status.HTTP_400_BAD_REQUEST
             )
@@ -333,17 +344,18 @@ class AddLocationToTariff(APIView):
         )
 
         city_to_price: CityToPrice = get_object_or_404(
-            tariff.intercity_tariff.cities,
+            tariff.intercity_tariff.cities.all(),
             id=location_id
         )
 
-        for price in city_to_price.prices.all():
-            price.delete()
-
         city_to_price.delete()
 
+        serializer = IntercityTariffSerializer(
+            tariff.intercity_tariff
+        )
+
         return Response(
-            {},
+            serializer.data,
             status.HTTP_200_OK
         )
 
@@ -354,17 +366,18 @@ class AddLocationToTariff(APIView):
         )
 
         global_address_to_price: GlobalAddressToPrice = get_object_or_404(
-            tariff.intercity_tariff.global_addresses,
+            tariff.intercity_tariff.global_addresses.all(),
             id=location_id
         )
 
-        for price in global_address_to_price.prices.all():
-            price.delete()
-
         global_address_to_price.delete()
 
+        serializer = IntercityTariffSerializer(
+            tariff.intercity_tariff
+        )
+
         return Response(
-            {},
+            serializer.data,
             status.HTTP_200_OK
         )
 
@@ -418,7 +431,12 @@ class ExportTariffView(APIView):
     permission_classes = (IsManagerOrAdminUser,)
 
     def get(self, request: Request):
-        filename = TariffToExcel.export(Tariff.objects.all().order_by("-id"))
+        tariffs_id = request.query_params.getlist("tariffs_id")
+
+        filename = TariffToExcel.export(Tariff.objects.filter(
+            pk__in=tariffs_id
+        ).order_by("-id"))
+
         url = Path(
             settings.EXCEL_ROOT,
             "tariffs/",

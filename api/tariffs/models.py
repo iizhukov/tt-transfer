@@ -38,7 +38,7 @@ def add_hub_to_tariffs(hub: Hub):
     ).first()
 
     for tariff in tariffs:
-        if hub_to_price not in tariff.intracity_tariff.hub_to_prices:
+        if hub_to_price not in tariff.intracity_tariff.hub_to_prices.all():
             tariff.intracity_tariff.hub_to_prices.add(
                 hub_to_price
             )
@@ -161,7 +161,8 @@ class AdditionalHubZoneToPrice(models.Model):
         return super().delete(*args, **kwargs)
 
     def _set_prices_to_zone(self):
-        self.prices.add(*set_default_car_classes_price())
+        if not self.prices.all():
+            self.prices.add(*set_default_car_classes_price())
 
 
 class HubToPrice(models.Model):
@@ -219,7 +220,7 @@ class HubToPrice(models.Model):
 
 
 class IntracityTariff(models.Model):
-    hub_to_prices: List[HubToPrice] = models.ManyToManyField(
+    hub_to_prices: models.ManyToManyField = models.ManyToManyField(
         HubToPrice, verbose_name=_('Цены к зонам')
     )
 
@@ -239,7 +240,7 @@ class IntracityTariff(models.Model):
         return self
 
     def delete(self, *args, **kwargs):
-        for htp in self.hub_to_prices:
+        for htp in self.hub_to_prices.all():
             self.hub_to_prices.remove(htp)
 
         self.save()
@@ -280,7 +281,7 @@ class AbstractLocationToPrice(models.Model):
         return self
 
     def delete(self, *args, **kwargs):
-        for price in self.prices:
+        for price in self.prices.all():
             self.prices.remove(price)
 
             price.delete()
@@ -418,6 +419,7 @@ class Tariff(models.Model):
         return f"{self.pk}: {self.title}"
 
     def save(self, *args, **kwargs):
+        self._set_intracity_tariff()
         self._set_intercity_tariff()
         self._set_hub_prices()
         self._generate_title()
@@ -465,25 +467,25 @@ class Tariff(models.Model):
                 self.services.add(service_)
 
     def _set_hub_prices(self, hubs=None):
-        intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
-
         if not hubs:
             hubs = Hub.objects.filter(
                 city=self.city
             )
 
-        print(hubs)
-
+        print("prices:", self.intracity_tariff.hub_to_prices.all())
         for hub in hubs:
-            hub_to_price = HubToPrice.objects.create(
-                hub=hub
-            )
-            intracity_tariff.hub_to_prices.add(hub_to_price)
 
-        self.intracity_tariff = intracity_tariff
+            if not self.intracity_tariff.hub_to_prices.filter(hub=hub):
+                hub_to_price = HubToPrice.objects.create(
+                    hub=hub
+                )
+                self.intracity_tariff.hub_to_prices.add(hub_to_price)
+
+    def _set_intracity_tariff(self):
+        self.intracity_tariff = self.intracity_tariff or IntracityTariff.objects.create()
 
     def _set_intercity_tariff(self):
-        self.intercity_tariff = IntercityTariff.objects.create()
+        self.intercity_tariff = self.intercity_tariff or IntercityTariff.objects.create()
 
 
 @receiver(m2m_changed, sender=IntercityTariff.cities.through)

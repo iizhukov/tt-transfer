@@ -211,7 +211,8 @@ class CompanyView(APIView):
             id=id
         )
 
-        city, _ = City.objects.get_or_create(
+        city = get_object_or_404(
+            City,
             region=request.data.get("region"),
             city=request.data.get("city")
         )

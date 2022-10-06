@@ -1,0 +1,65 @@
+{% extends "admin/base.html" %}
+
+{% load static %}
+
+<!--{% block extrastyle %}-->
+<!--<style>-->
+<!--    body {-->
+<!--        &#45;&#45;green: #8DC73F;-->
+<!--        &#45;&#45;dark-green: #70C74E;-->
+<!--        &#45;&#45;red: #DB5454;-->
+
+<!--        &#45;&#45;header-link-color: white;-->
+<!--        &#45;&#45;header-color: white;-->
+<!--        &#45;&#45;accent: white;-->
+<!--        &#45;&#45;breadcrumbs-fg: white;-->
+<!--        &#45;&#45;body-fg: white;-->
+
+<!--        &#45;&#45;primary: var(&#45;&#45;green);-->
+<!--        &#45;&#45;header-bg: var(&#45;&#45;green);-->
+<!--        &#45;&#45;link-fg: var(&#45;&#45;green);-->
+<!--        &#45;&#45;object-tools-bg: var(&#45;&#45;green);-->
+<!--        &#45;&#45;button-bg: var(&#45;&#45;green);-->
+<!--        &#45;&#45;default-button-hover-bg: var(&#45;&#45;green);-->
+
+<!--        &#45;&#45;default-button-bg: var(&#45;&#45;dark-green);-->
+<!--        &#45;&#45;button-hover-bg: var(&#45;&#45;dark-green);-->
+<!--        &#45;&#45;breadcrumbs-bg: var(&#45;&#45;dark-green);-->
+<!--        &#45;&#45;link-hover-color: var(&#45;&#45;dark-green);-->
+<!--        &#45;&#45;object-tools-hover-bg: var(&#45;&#45;dark-green);-->
+
+<!--        &#45;&#45;message-warning-bg: var(&#45;&#45;red);-->
+<!--    }-->
+
+<!--    .button {-->
+<!--        background-color: var(&#45;&#45;green);-->
+<!--    }-->
+
+<!--    h1 {-->
+<!--        font-size: 40px;-->
+<!--    }-->
+<!--    h2 {-->
+<!--        color: #8DC73F;-->
+<!--    }-->
+<!--</style>-->
+<!--{% endblock %}-->
+
+{% block title %}
+Панель Администратора
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">TT-Crm.ru - Панель администратора</a></h1>
+{% endblock %}
+
+{% block usertools %}
+<div id="user-tools">
+    <strong>{{ user.email }}</strong>.
+    <a href="https://tt-crm.ru/">Открыть сайт</a> /
+    <a href="/password_change/">Изменить пароль</a> /
+
+    <a href="/logout/">Выйти</a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

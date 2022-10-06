@@ -1,1 +1,2 @@
 class TariffSearch:
+    pass

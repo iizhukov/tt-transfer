@@ -3,8 +3,8 @@ import json
 
 from .models import City
 
-
-FEDERAL_CITIES = ("Москва", "Санкт-Петерубрг", "Севастополь")
+FEDERAL_CITIES = ("Москва", "Санкт-Петербург", "Севастополь")
+NEW_RU_CITIES_BY_REGION = ("Луганская область", "Донецкая область", "Херсонская область", "Запорожская область")
 
 
 def get_cities():
@@ -31,6 +31,7 @@ def create_federal_cities():
 
 def create_cities():
     for region, city in get_cities():
+        print(region, city)
         print(
             City.objects.get_or_create(
                 region=region,
@@ -48,4 +49,3 @@ def clear_cities_with_out_center_coordinates(delete=False):
 
     if delete:
         cities.delete()
-
