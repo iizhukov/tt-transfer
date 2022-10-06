@@ -511,7 +511,9 @@ def func(sender, instance, **kwargs):
     city_to_price.save()
 
     tariff: Tariff = Tariff.objects.get(
-        city=intercity_city
+        city=intercity_city,
+        type=instance.tariff.type,
+        commission=instance.tariff.commission
     )
     if not tariff.intercity_tariff.cities.filter(
             city=tariff_city

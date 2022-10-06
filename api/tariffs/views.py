@@ -283,7 +283,9 @@ class AddLocationToTariff(APIView):
             )
 
         if not Tariff.objects.filter(
-                city=city
+                city=city,
+                type=tariff.type,
+                commission=tariff.commission
         ):
             return Response(
                 {
