@@ -447,7 +447,7 @@ class ExportTariffView(APIView):
             (
                 Tariff.objects.filter(
                     pk__in=tariff_ids
-                ).order_by("-id")
+                )
 
                 if tariff_ids else
 
