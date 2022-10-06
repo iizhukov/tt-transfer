@@ -277,7 +277,17 @@ class AddLocationToTariff(APIView):
         ):
             return Response(
                 {
-                    "detail": "Город с таким именеем уже задан"
+                    "detail": "Город с таким именем уже задан"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        if not Tariff.objects.filter(
+                city=city
+        ):
+            return Response(
+                {
+                    "detail": f"Для начала создайте тариф для города {city.city}"
                 },
                 status.HTTP_400_BAD_REQUEST
             )

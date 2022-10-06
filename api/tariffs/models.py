@@ -497,10 +497,11 @@ def func(sender, instance, **kwargs):
     city_to_price: CityToPrice = CityToPrice.objects.get(
         id=kwargs.get("pk_set").pop()
     )
+    intercity_city = city_to_price.city
 
     res = DistanceAndDuration.get(
         tariff_city.get_center_as_string(),
-        city_to_price.city.get_center_as_string()
+        intercity_city.get_center_as_string()
     )
 
     city_to_price.distance = res[0]
@@ -508,3 +509,19 @@ def func(sender, instance, **kwargs):
     city_to_price.minutes_duration = res[2]
 
     city_to_price.save()
+
+    tariff: Tariff = Tariff.objects.get(
+        city=intercity_city
+    )
+    if not tariff.intercity_tariff.cities.filter(
+            city=tariff_city
+    ):
+        new_city_to_price: CityToPrice = CityToPrice.objects.create(
+            city=tariff_city,
+        )
+        for price in city_to_price.prices.all():
+            new_city_to_price.prices.add(price)
+
+        tariff.intercity_tariff.cities.add(
+            new_city_to_price
+        )
