@@ -361,16 +361,13 @@ class AddLocationToTariff(APIView):
         )
 
         tariff_: Tariff = Tariff.objects.get(
-            city=tariff.city,
+            city=city_to_price.city,
             type=tariff.type,
             commission=tariff.commission
         )
         city_to_price2 = tariff_.intercity_tariff.cities.get(
-            city=city_to_price.city
+            city=tariff.city
         )
-
-        tariff_.intercity_tariff.cities.remove(city_to_price2)
-        tariff.intercity_tariff.cities.remove(city_to_price)
 
         city_to_price2.delete()
         city_to_price.delete()

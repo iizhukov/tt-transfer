@@ -490,7 +490,7 @@ class Tariff(models.Model):
 
 @receiver(m2m_changed, sender=IntercityTariff.cities.through)
 def func(sender, instance, **kwargs):
-    if kwargs.get("action", "pre_add") == "pre_add":
+    if kwargs.get("action", "pre_add") in ("pre_add", "post_remove", "pre_remove"):
         return
 
     tariff_city: City = instance.tariff.city
