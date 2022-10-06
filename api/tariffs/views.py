@@ -360,6 +360,16 @@ class AddLocationToTariff(APIView):
             id=location_id
         )
 
+        tariff_: Tariff = Tariff.objects.filter(
+            city=tariff.city,
+            type=tariff.type,
+            commission=tariff.commission
+        )
+        city_to_price2 = tariff_.intercity_tariff.cities.filter(
+            city=city_to_price.city
+        ).first()
+
+        city_to_price2.delete()
         city_to_price.delete()
 
         serializer = IntercityTariffSerializer(
