@@ -369,6 +369,9 @@ class AddLocationToTariff(APIView):
             city=city_to_price.city
         )
 
+        tariff_.intercity_tariff.cities.remove(city_to_price2)
+        tariff.intercity_tariff.cities.remove(city_to_price)
+
         city_to_price2.delete()
         city_to_price.delete()
 
