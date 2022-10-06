@@ -1,8 +1,10 @@
-from venv import create
+import random
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
-from api.profile.models import Admin, Manager, Client, Driver
+from api.profile.models import Admin, Manager, Client, Driver, EmployeeModel
+
+CHARS = 'abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
 
 
 class UserManager(BaseUserManager):
@@ -62,3 +64,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('role', 'a')
 
         return self.create_user(email, password, **extra_fields)
+
+    @staticmethod
+    def generate_password(length=10):
+        password = ''
+
+        for i in range(length):
+            password += random.choice(CHARS)
+
+        return password

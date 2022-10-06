@@ -1,11 +1,8 @@
 from api.mail import SendMailManager
 
 
-class SendEmployeeData(SendMailManager):
-    def send_employee_data(self, user_data: dict):
-        name = user_data.get("name", "Ошибка!")
-        password = user_data.get("password", "Ошибка!")
-    
-        title = f"Данные пользователя {name}"
-        body = f"Пароль: {password}"
+class SendEmployeePassword(SendMailManager):
+    def send_password(self, password):
+        title = "Регистрация на платформе TT-Crm"
+        body = f"Ваш пароль: {password}\nНастоятельно рекомендуем сменить временный пароль в профиле"
         super().send(title=title, body=body)

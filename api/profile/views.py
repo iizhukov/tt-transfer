@@ -1,22 +1,24 @@
 from rest_framework.views import APIView
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
+from validate_email import validate_email
 
-from .models import Company
+from .models import Company, EmployeeModel
 from api.authentication.models import User, UserDocument
 from api.address.models import City, Address
+from .email import SendEmployeePassword
 from api.authentication.serializers import (
     GetUserSerializer, UserSerializer
 )
 from .serializers import (
     ChangePasswordSerializer, UserEditSerializer,
     AvatarSerializer, DocumentSerializer,
-    CompanySerializer
+    CompanySerializer, EmployeeSerializer
 )
 
 
@@ -140,18 +142,81 @@ class UserListView(ListAPIView):
     serializer_class = UserSerializer
 
 
+class CompanyEmployeeView(APIView):
+    serializer_class = EmployeeSerializer
+
+    def post(self, request: Request, company_id):
+        # if not CompanyEmployeeView._check_email(request.data.get("email")):
+        #     return Response(
+        #         {
+        #             "detail": "Некорректная почта"
+        #         },
+        #         status.HTTP_400_BAD_REQUEST
+        #     )
+
+        email = request.data.get("email")
+        password = User.objects.generate_password()
+
+        if User.objects.filter(email=email):
+            return Response(
+                {
+                    "detail": "Пользователь с такой почтой уже существует"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        user_employee = User.objects.create_user(
+            email,
+            password,
+            name=request.data.get("name"),
+            surname=request.data.get("surname"),
+            patronymic=request.data.get("patronymic"),
+            phone=request.data.get("phone"),
+            role="e"
+        )
+
+        employee = EmployeeModel.objects.create(
+            user=user_employee
+        )
+
+        SendEmployeePassword((email,)).send_password(password)
+
+        Company.objects.get(
+            pk=company_id
+        ).employees.add(employee)
+
+        serializer = EmployeeSerializer(
+            employee
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
+
+    @staticmethod
+    def _check_email(email):
+        return validate_email(email, verify=True)
+
+
 class CompanyView(APIView):
     serializer_class = CompanySerializer
 
-    # permission_classes = (AllowAny, )
-
-    def get(self, request):
-        serializer = self.serializer_class(
-            Company.objects.filter(
-                user=request.user
-            ),
-            many=True
-        )
+    def get(self, request, id: int = None):
+        if id:
+            serializer = self.serializer_class(
+                get_object_or_404(
+                    Company,
+                    pk=id
+                )
+            )
+        else:
+            serializer = self.serializer_class(
+                Company.objects.filter(
+                    owner=request.user
+                ),
+                many=True
+            )
 
         return Response(
             serializer.data,
@@ -182,7 +247,7 @@ class CompanyView(APIView):
             )
 
         serializer.save(
-            user=request.user,
+            owner=request.user,
             address=address
         )
 

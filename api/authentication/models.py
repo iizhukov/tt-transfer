@@ -46,7 +46,7 @@ def _path(instance, filename):
     return os.path.join(path, f"avatar.{format_}")
 
 
-ROLES = (('a', 'admin'), ('m', 'manager'), ('d', 'driver'), ('c', 'client'))
+ROLES = (('a', 'admin'), ('m', 'manager'), ('d', 'driver'), ('c', 'client'), ('e', 'employee'))
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -102,7 +102,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.name} {self.surname}"
 
     def save(self, *args, **kwargs):
-        if self.role in ("c", "d"):
+        if self.role in ("c", "d", "e"):
             self.confirmed = True
 
         return super(User, self).save(*args, **kwargs)

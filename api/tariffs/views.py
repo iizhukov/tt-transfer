@@ -441,7 +441,7 @@ class ExportTariffView(APIView):
     permission_classes = (IsManagerOrAdminUser,)
 
     def get(self, request: Request):
-        tariffs_id = request.query_params.getlist("tariffs_id")
+        tariffs_id = request.query_params.getlist("tariffs")
 
         filename = TariffToExcel.export(Tariff.objects.filter(
             pk__in=tariffs_id

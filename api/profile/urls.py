@@ -3,7 +3,6 @@ from rest_framework_simplejwt import views as jwt_views
 
 from . import views
 
-
 urlpatterns = [
     path('edit/change-password/', views.ChangePasswordView.as_view(), name='change_password'),
     path('edit/user-data/', views.EditUserView.as_view(), name="edit_user_data"),
@@ -14,5 +13,6 @@ urlpatterns = [
     path('user-list/', views.UserListView.as_view(), name="user_list"),
 
     path('company/', views.CompanyView.as_view(), name="company"),
-    path('company/<int:id>', views.CompanyView.as_view(), name="company"),
+    path('company/<int:id>/', views.CompanyView.as_view(), name="company_by_id"),
+    path('company/<int:company_id>/employee/', views.CompanyEmployeeView.as_view(), name="company_employee"),
 ]

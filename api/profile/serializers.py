@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 from api.authentication.models import User, UserDocument
 from api.cars.serializers import CarSerializer, CarWithOutUserSerializer
 from api.authentication.serializers import ProtectedGetUserSerializer
-from api.profile.models import Company, Manager, Client, Driver, Admin
+from api.profile.models import Company, Manager, Client, Driver, Admin, EmployeeModel
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -26,17 +26,26 @@ class UserEditSerializer(serializers.ModelSerializer):
 class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('avatar', )
+        fields = ('avatar',)
 
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDocument
-        fields = ('document', )
+        fields = ('document',)
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    user = ProtectedGetUserSerializer(read_only=True)
+
+    class Meta:
+        model = EmployeeModel
+        fields = "__all__"
+        depth = 1
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    user = ProtectedGetUserSerializer(read_only=True)
+    owner = ProtectedGetUserSerializer(read_only=True)
 
     class Meta:
         model = Company
@@ -60,18 +69,6 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = "__all__"
         depth = 1
-
-
-class ProtectedGetUserSerializer(serializers.ModelSerializer):
-    avatar = serializers.URLField()
-    documents = DocumentSerializer(allow_null=True, many=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'name', 'surname', 'documents',
-            'patronymic', 'role', 'avatar'
-        )
 
 
 class DriverSerializer(serializers.ModelSerializer):

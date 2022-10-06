@@ -6,6 +6,6 @@ class SendCode(SendMailManager):
         super().__init__(to)
 
     def send_code(self, code):
-        title = "Код смены пароля TT-Transfer"
+        title = "Код смены пароля TT-Crm"
         body = f"Код: {code}"
         super().send(title=title, body=body)

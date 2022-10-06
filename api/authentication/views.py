@@ -41,8 +41,8 @@ class CreateUserView(APIView):
         serializered_user = UserSerializer(data=user_sample)
 
         if serializered_user.is_valid():
-            # if not CreateUserView._check_email(serializered_user.data.get("email")):
-            #     return Response({"detail": "Неккоректная почта"}, status=status.HTTP_409_CONFLICT)
+            if not CreateUserView._check_email(serializered_user.data.get("email")):
+                return Response({"detail": "Некорректная почта"}, status=status.HTTP_409_CONFLICT)
 
             if serializered_user.save():
                 return Response(serializered_user.data, status=status.HTTP_200_OK)
