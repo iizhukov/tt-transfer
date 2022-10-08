@@ -761,3 +761,36 @@ class FilterGlobalAddressesView(APIView):
             )),
             status.HTTP_200_OK
         )
+
+
+class FilterHubsView(APIView):
+    def get(self, request: Request):
+        search = request.query_params.get("search")
+
+        response = []
+
+        if not search:
+            return Response(
+                [],
+                status.HTTP_200_OK
+            )
+
+        for hub_title in Hub.objects.values("title").all():
+            coincidence = fuzz.ratio(search.lower(), hub_title.get("title").lower())
+            response.append((hub_title.get("title"), coincidence))
+
+            if coincidence == 100:
+                return Response(
+                    [hub_title.get("title")],
+                    status.HTTP_200_OK
+                )
+
+        response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
+
+        return Response(
+            list(map(
+                lambda value: value[0],
+                response
+            )),
+            status.HTTP_200_OK
+        )

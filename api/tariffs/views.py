@@ -8,11 +8,11 @@ from django.http import HttpResponse
 from django.conf import settings, Path
 from django.shortcuts import get_object_or_404
 
-from api.address.models import City, GlobalAddress
+from api.address.models import City, GlobalAddress, Hub
 from api.profile.models import Company
 from api.permissions import IsManagerOrAdminUser
 from .models import (
-    IntracityTariff, PriceToCarClass,
+    HubsToPriceModel, IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff,
     GlobalAddressToPrice, CityToPrice,
     DEFAULT_SERVICES_LIST,
@@ -284,8 +284,16 @@ class AddLocationToTariff(APIView):
                 },
                 status.HTTP_400_BAD_REQUEST
             )
+            
+        if city == tariff.city:
+            return Response(
+                {
+                    "detail": "Вы не можете создать межгородское направление из города 'A' в город 'А'."
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
 
-        if not Tariff.objects.filter(
+        if request.data.get("converse", False) and not Tariff.objects.filter(
                 city=city,
                 type=tariff.type,
                 commission=tariff.commission
@@ -349,7 +357,40 @@ class AddLocationToTariff(APIView):
         )
 
     def _post_for_hub(self, request: Request, tariff_id: int):
-        ...
+        tariff: Tariff = get_object_or_404(
+            Tariff,
+            pk=tariff_id
+        )
+
+        hub = get_object_or_404(
+            Hub,
+            title=request.data.get("hub")
+        )
+        
+        if tariff.intercity_tariff.hubs.filter(
+                hub=hub
+        ):
+            return Response(
+                {
+                    "detail": f"Маршрут для хаба '{hub.title}' уже создан."
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        hub_to_price = HubsToPriceModel.objects.create(
+            hub=hub
+        )
+
+        tariff.intercity_tariff.hubs.add(hub_to_price)
+
+        serializer = TariffSerializer(
+            tariff
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
 
     def delete(self, request: Request, tariff_id: int, location_id: int):
         if self.location == "city":

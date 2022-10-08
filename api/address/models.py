@@ -165,6 +165,9 @@ class Hub(AbstractAddressModel):
     def create_slug(self):
         return slugify(self.title)
 
+    def get_coords_as_string(self):
+        return self.coordinate.get_string()
+
 
 class GlobalAddress(AbstractAddressModel):
     address = models.CharField(
@@ -183,6 +186,9 @@ class GlobalAddress(AbstractAddressModel):
         print(type(self.coordinate))
 
         super().save(*args, **kwargs)
+        
+    def get_coords_as_string(self):
+        return self.coordinate.get_string()
 
 
 class Coordinate(models.Model):
@@ -205,6 +211,9 @@ class Coordinate(models.Model):
 
     def get_tuple(self):
         return (self.latitude, self.longitude)
+    
+    def get_string(self):
+        return f"{self.latitude}, {self.longitude}"
 
 
 class CityZone(models.Model):

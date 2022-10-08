@@ -267,16 +267,19 @@ class AbstractLocationToPrice(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def save(self, prices=[], *args, **kwargs):
         set_prices = False
 
-        if not self.pk:
+        if not self.pk and not prices:
             set_prices = True
 
         super().save(*args, **kwargs)
 
         if set_prices:
             self._set_prices()
+            
+        if prices:
+            self.prices.add(*prices)
 
         return self
 
@@ -324,7 +327,7 @@ class GlobalAddressToPrice(AbstractLocationToPrice):
 
 
 class HubsToPriceModel(AbstractLocationToPrice):
-    hubs = models.ForeignKey(
+    hub = models.ForeignKey(
         Hub, models.CASCADE, verbose_name=_('В хаб')
     )
 
@@ -490,7 +493,6 @@ class Tariff(models.Model):
                 city=self.city
             )
 
-        print("prices:", self.intracity_tariff.hub_to_prices.all())
         for hub in hubs:
 
             if not self.intracity_tariff.hub_to_prices.filter(hub=hub):
@@ -510,7 +512,7 @@ class Tariff(models.Model):
 def func(sender, instance, **kwargs):
     if kwargs.get("action", "pre_add") in ("pre_add", "post_remove", "pre_remove"):
         return
-
+    
     tariff_city: City = instance.tariff.city
     city_to_price: CityToPrice = CityToPrice.objects.get(
         id=kwargs.get("pk_set").pop()
@@ -528,24 +530,71 @@ def func(sender, instance, **kwargs):
 
     city_to_price.save()
 
-    tariff: Tariff = Tariff.objects.get(
-        city=intercity_city,
-        type=instance.tariff.type,
-        commission=instance.tariff.commission
+    if city_to_price.converse:
+        tariff: Tariff = Tariff.objects.get(
+            city=intercity_city,
+            type=instance.tariff.type,
+            commission=instance.tariff.commission
+        )
+        if not tariff.intercity_tariff.cities.filter(
+                city=tariff_city
+        ):
+            new_city_to_price: CityToPrice = CityToPrice(
+                city=tariff_city,
+            )
+
+            new_city_to_price.save(prices=city_to_price.prices.all())
+
+            tariff.intercity_tariff.cities.add(
+                new_city_to_price
+            )
+
+            tariff.save()
+
+        instance.tariff.save()
+
+
+@receiver(m2m_changed, sender=IntercityTariff.global_addresses.through)
+def func(sender, instance, **kwargs):
+    if kwargs.get("action", "pre_add") in ("pre_add", "post_remove", "pre_remove"):
+        return
+    
+    tariff_city: City = instance.tariff.city
+    global_address_to_price: GlobalAddressToPrice = GlobalAddressToPrice.objects.get(
+        id=kwargs.get("pk_set").pop()
     )
-    if not tariff.intercity_tariff.cities.filter(
-            city=tariff_city
-    ):
-        new_city_to_price: CityToPrice = CityToPrice.objects.create(
-            city=tariff_city,
-        )
-        for price in city_to_price.prices.all():
-            new_city_to_price.prices.add(price)
+    global_address = global_address_to_price.global_address
 
-        tariff.intercity_tariff.cities.add(
-            new_city_to_price
-        )
+    res = DistanceAndDuration.get(
+        tariff_city.get_center_as_string(),
+        global_address.get_coords_as_string()
+    )
 
-        tariff.save()
+    global_address_to_price.distance = res[0]
+    global_address_to_price.hours_duration = res[1]
+    global_address_to_price.minutes_duration = res[2]
 
-    instance.tariff.save()
+    global_address_to_price.save()
+    
+
+@receiver(m2m_changed, sender=IntercityTariff.hubs.through)
+def func(sender, instance, **kwargs):
+    if kwargs.get("action", "pre_add") in ("pre_add", "post_remove", "pre_remove"):
+        return
+    
+    tariff_city: City = instance.tariff.city
+    hub_to_price: HubsToPriceModel = HubsToPriceModel.objects.get(
+        id=kwargs.get("pk_set").pop()
+    )
+    hub = hub_to_price.hub
+
+    res = DistanceAndDuration.get(
+        tariff_city.get_center_as_string(),
+        hub.get_coords_as_string()
+    )
+
+    hub_to_price.distance = res[0]
+    hub_to_price.hours_duration = res[1]
+    hub_to_price.minutes_duration = res[2]
+
+    hub_to_price.save()
