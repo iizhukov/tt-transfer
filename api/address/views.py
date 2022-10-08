@@ -592,22 +592,30 @@ class GlobalAddressView(APIView):
         )
 
     def post(self, request: Request):
+        lat, lon = map(float, request.data.get("coordinates").replace("[", "").replace("]", "").split(","))
+
         coordinates, _ = Coordinate.objects.get_or_create(
-            latitude=request.data.get("coordinate")[0],
-            longitude=request.data.get("coordinate")[1]
+            latitude=lat,
+            longitude=lon
         )
 
-        global_address, _ = GlobalAddress.objects.get_or_create(
+        global_address, created = GlobalAddress.objects.get_or_create(
             coordinate=coordinates,
             address=request.data.get("address")
         )
 
-        serializer = self.serializer_class(
-            global_address
-        )
+        if not created:
+            return Response(
+                {
+                    "detail": "Такой глобальный адрес уже существует."
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
 
         return Response(
-            serializer.data,
+            {
+                "detail": f"Глобальный адрес '{global_address.address}' создан."
+            },
             status.HTTP_201_CREATED
         )
 

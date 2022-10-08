@@ -168,7 +168,7 @@ class Hub(AbstractAddressModel):
 
 class GlobalAddress(AbstractAddressModel):
     address = models.CharField(
-        _('адрес'), max_length=256, null=True
+        _('адрес'), max_length=256, unique=True
     )
 
     class Meta:
