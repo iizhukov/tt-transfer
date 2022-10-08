@@ -26,5 +26,5 @@ urlpatterns = [
     # Search
     path('filter-regions', views.FilterRegionsView.as_view(), name="filter_regions"),
     path('filter-cities', views.FilterCitiesView.as_view(), name="filter_cities"),
-    path('filter-global-addresses', views.FilterGlobalAddressesView.as_view(), name="filter-global-addresses"),
+    path('search-global-addresses', views.FilterGlobalAddressesView.as_view(), name="filter-global-addresses"),
 ]
