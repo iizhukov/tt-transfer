@@ -419,17 +419,19 @@ class AddLocationToTariff(APIView):
             tariff.intercity_tariff.cities.all(),
             id=location_id
         )
+        
+        if city_to_price.converse:
+            tariff_: Tariff = Tariff.objects.get(
+                city=city_to_price.city,
+                type=tariff.type,
+                commission=tariff.commission
+            )
+            city_to_price2 = tariff_.intercity_tariff.cities.get(
+                city=tariff.city
+            )
 
-        tariff_: Tariff = Tariff.objects.get(
-            city=city_to_price.city,
-            type=tariff.type,
-            commission=tariff.commission
-        )
-        city_to_price2 = tariff_.intercity_tariff.cities.get(
-            city=tariff.city
-        )
+            city_to_price2.delete()
 
-        city_to_price2.delete()
         city_to_price.delete()
 
         serializer = IntercityTariffSerializer(
@@ -464,7 +466,26 @@ class AddLocationToTariff(APIView):
         )
 
     def _delete_for_hub(self, request: Request, tariff_id: int, location_id: int):
-        ...
+        tariff: Tariff = get_object_or_404(
+            Tariff,
+            id=tariff_id
+        )
+
+        hub_to_price: HubsToPriceModel = get_object_or_404(
+            tariff.intercity_tariff.hubs.all(),
+            id=location_id
+        )
+
+        hub_to_price.delete()
+
+        serializer = IntercityTariffSerializer(
+            tariff.intercity_tariff
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )
 
 
 class GetServicesView(APIView):
