@@ -71,10 +71,6 @@ class City(models.Model):
 
 
 class AbstractAddressModel(models.Model):
-    city = models.ForeignKey(
-        City, models.CASCADE, verbose_name=_('Город'),
-        blank=True, default=None,
-    )
     coordinate = models.ForeignKey(
         "Coordinate", models.CASCADE,
         verbose_name=_('Координаты'),
@@ -87,13 +83,14 @@ class AbstractAddressModel(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return self.model_as_raw()
-
-    def model_as_raw(self, region=True):
-        return f"{self.city}, {self.street}, {self.number}"
+        return str(self.pk)
 
 
 class Address(AbstractAddressModel):
+    city = models.ForeignKey(
+        City, models.CASCADE, verbose_name=_('Город'),
+        blank=True, default=None,
+    )
     street = models.CharField(
         _('Улица'), max_length=128,
         null=True, blank=True
@@ -129,8 +126,15 @@ class Address(AbstractAddressModel):
 
         return None
 
+    def model_as_raw(self, region=True):
+        return f"{self.city}, {self.street}, {self.number}"
+
 
 class Hub(AbstractAddressModel):
+    city = models.ForeignKey(
+        City, models.CASCADE, verbose_name=_('Город'),
+        blank=True, default=None,
+    )
     title = models.CharField(
         _('Название'), max_length=256,
         unique=True
@@ -172,6 +176,14 @@ class GlobalAddress(AbstractAddressModel):
         verbose_name = "Глобальный адрес"
         verbose_name_plural = "Глобальные адреса"
 
+    def __str__(self):
+        return str(self.address)
+
+    def save(self, *args, **kwargs):
+        print(type(self.coordinate))
+
+        super().save(*args, **kwargs)
+
 
 class Coordinate(models.Model):
     latitude = models.FloatField(
@@ -187,12 +199,6 @@ class Coordinate(models.Model):
         db_table = "city_zone_coordinate"
         verbose_name = "Координата"
         verbose_name_plural = "Координаты"
-        constraints = [
-            UniqueConstraint(
-                fields=('latitude', 'longitude'),
-                name="unique_coords"
-            )
-        ]
 
     def __str__(self) -> str:
         return f"{self.latitude}, {self.longitude}"

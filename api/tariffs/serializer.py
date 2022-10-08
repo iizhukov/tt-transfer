@@ -125,7 +125,7 @@ class GlobalAddressToPriceSerializer(serializers.ModelSerializer):
 
 class IntercityTariffSerializer(serializers.ModelSerializer):
     cities = CityToPriceSerializer(many=True)
-    global_addresses = PriceToCarClassSerializer(many=True)
+    global_addresses = GlobalAddressToPriceSerializer(many=True)
 
     class Meta:
         model = IntercityTariff

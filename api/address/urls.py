@@ -2,11 +2,11 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     # Address
     path('', views.AddressView.as_view(), name="addresses"),
     path('add-address/', views.AddAddressView.as_view(), name="add_address"),
+    path('global-address/', views.GlobalAddressView.as_view(), name="create_global_address"),
 
     # City
     path('city/', views.CityView.as_view(), name="city"),
@@ -20,9 +20,11 @@ urlpatterns = [
     path('edit-hub-zone/<int:zone_id>/', views.EditHubZoneView.as_view(), name="edit_hub_zone"),
     path('get-hub-zone-by-coordinates/', views.GetHubZoneByCoordsAndHubView.as_view(), name="get_hub_zone_by_coords"),
 
-    path('distance-and-duration/', views.GetDistanceAndDurationBetweenCitiesView.as_view(), name="get_distance_and_duration"),
+    path('distance-and-duration/', views.GetDistanceAndDurationBetweenCitiesView.as_view(),
+         name="get_distance_and_duration"),
 
     # Search
     path('filter-regions', views.FilterRegionsView.as_view(), name="filter_regions"),
     path('filter-cities', views.FilterCitiesView.as_view(), name="filter_cities"),
+    path('filter-global-addresses', views.FilterGlobalAddressesView.as_view(), name="filter-global-addresses"),
 ]

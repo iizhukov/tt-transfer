@@ -296,6 +296,9 @@ class CityToPrice(AbstractLocationToPrice):
     city = models.ForeignKey(
         City, models.CASCADE, verbose_name=_('В город')
     )
+    converse = models.BooleanField(
+        _('Обратный?'), default=False
+    )
 
     class Meta:
         db_table = "city_to_price"
@@ -320,6 +323,17 @@ class GlobalAddressToPrice(AbstractLocationToPrice):
         return f"{self.pk}: {self.global_address}"
 
 
+class HubToPriceModel(AbstractLocationToPrice):
+    hubs = models.ForeignKey(
+        Hub, models.CASCADE, verbose_name=_('В хаб')
+    )
+
+    class Meta:
+        db_table = "hub_to_price_intercity"
+        verbose_name = "Хаб к ценам"
+        verbose_name_plural = "Хабы к ценам"
+
+
 class IntercityTariff(models.Model):
     cities = models.ManyToManyField(
         CityToPrice, verbose_name=_('В города'),
@@ -327,6 +341,10 @@ class IntercityTariff(models.Model):
     )
     global_addresses = models.ManyToManyField(
         GlobalAddressToPrice, verbose_name=_('В глобальные адреса'),
+        blank=True
+    )
+    hubs = models.ManyToManyField(
+        HubToPriceModel, verbose_name=_('В хабы'),
         blank=True
     )
 

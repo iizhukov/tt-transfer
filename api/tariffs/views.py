@@ -248,6 +248,9 @@ class AddLocationToTariff(APIView):
         if self.location == "global_address":
             return self._post_for_global_address(request, tariff_id)
 
+        if self.location == "hub":
+            return self._post_for_hub(request, tariff_id)
+
         return Response(
             {
                 "detail": "bad location"
@@ -317,8 +320,18 @@ class AddLocationToTariff(APIView):
 
         global_address = get_object_or_404(
             GlobalAddress,
-            id=request.data.get("global_address_id")
+            address=request.data.get("global_address")
         )
+
+        if tariff.intercity_tariff.global_addresses.filter(
+                global_address=global_address
+        ):
+            return Response(
+                {
+                    "detail": f"Маршрут для глобального адреса '{global_address}' уже создан."
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
 
         global_address_to_price = GlobalAddressToPrice.objects.create(
             global_address=global_address
@@ -335,12 +348,18 @@ class AddLocationToTariff(APIView):
             status.HTTP_200_OK
         )
 
+    def _post_for_hub(self, request: Request, tariff_id: int):
+        ...
+
     def delete(self, request: Request, tariff_id: int, location_id: int):
         if self.location == "city":
             return self._delete_for_city(request, tariff_id, location_id)
 
         if self.location == "global_address":
             return self._delete_for_global_address(request, tariff_id, location_id)
+
+        if self.location == "hub":
+            return self._delete_for_hub(request, tariff_id, location_id)
 
         return Response(
             {
@@ -402,6 +421,9 @@ class AddLocationToTariff(APIView):
             serializer.data,
             status.HTTP_200_OK
         )
+
+    def _delete_for_hub(self, request: Request, tariff_id: int, location_id: int):
+        ...
 
 
 class GetServicesView(APIView):

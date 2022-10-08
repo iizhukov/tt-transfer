@@ -17,8 +17,13 @@ urlpatterns = [
          name="add_city_to_tariff"),
     path('tariff/<int:tariff_id>/intercity/global-address/',
          views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
+    path('tariff/<int:tariff_id>/intercity/hub/', views.AddLocationToTariff.as_view(location="hub"),
+         name="add_hub_to_tariff"),
+
     path('tariff/<int:tariff_id>/intercity/city/<int:location_id>/', views.AddLocationToTariff.as_view(location="city"),
          name="add_city_to_tariff"),
     path('tariff/<int:tariff_id>/intercity/global-address/<int:location_id>/',
          views.AddLocationToTariff.as_view(location="global_address"), name="add_global_address_to_tariff"),
+    path('tariff/<int:tariff_id>/intercity/hub/<int:location_id>/', views.AddLocationToTariff.as_view(location="hub"),
+         name="add_hub_to_tariff"),
 ]

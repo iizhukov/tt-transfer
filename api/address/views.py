@@ -592,10 +592,23 @@ class GlobalAddressView(APIView):
         )
 
     def post(self, request: Request):
-        city = get_object_or_404(
-            City,
-            region=request.data.get("region"),
-            city=request.data.get("city")
+        coordinates, _ = Coordinate.objects.get_or_create(
+            latitude=request.data.get("coordinate")[0],
+            longitude=request.data.get("coordinate")[1]
+        )
+
+        global_address, _ = GlobalAddress.objects.get_or_create(
+            coordinate=coordinates,
+            address=request.data.get("address")
+        )
+
+        serializer = self.serializer_class(
+            global_address
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_201_CREATED
         )
 
 
@@ -695,6 +708,39 @@ class FilterCitiesView(APIView):
             if coincidence == 100:
                 return Response(
                     [city],
+                    status.HTTP_200_OK
+                )
+
+        response = sorted(response, key=lambda value: value[1], reverse=True)[:5]
+
+        return Response(
+            list(map(
+                lambda value: value[0],
+                response
+            )),
+            status.HTTP_200_OK
+        )
+
+
+class FilterGlobalAddressesView(APIView):
+    def get(self, request: Request):
+        search = request.query_params.get("search")
+
+        response = []
+
+        if not search:
+            return Response(
+                [],
+                status.HTTP_200_OK
+            )
+
+        for global_addr in GlobalAddress.objects.all():
+            coincidence = fuzz.ratio(search.lower(), global_addr.address.lower())
+            response.append((global_addr.address, coincidence))
+
+            if coincidence == 100:
+                return Response(
+                    [global_addr.address],
                     status.HTTP_200_OK
                 )
 
