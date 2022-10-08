@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from api.address.serializers import CitySerializer
 from api.cars.models import CAR_CLASSES
@@ -7,7 +8,7 @@ from .models import (
     IntracityTariff, PriceToCarClass,
     ServiceToPrice, Tariff, IntercityTariff,
     HubToPrice, CityToPrice, GlobalAddressToPrice,
-    AdditionalHubZoneToPrice
+    AdditionalHubZoneToPrice, HubsToPriceModel
 )
 
 
@@ -123,14 +124,47 @@ class GlobalAddressToPriceSerializer(serializers.ModelSerializer):
         return response
 
 
+class HubsToPriceSerializer(serializers.ModelSerializer):
+    prices = PriceToCarClassSerializer(many=True)
+
+    class Meta:
+        model = HubsToPriceModel
+        fields = "__all__"
+        depth = 2
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["prices"] = sorted(
+            response["prices"],
+            key=lambda x: x["id"]
+        )
+        return response
+
+
 class IntercityTariffSerializer(serializers.ModelSerializer):
     cities = CityToPriceSerializer(many=True)
     global_addresses = GlobalAddressToPriceSerializer(many=True)
+    hubs = HubsToPriceSerializer(many=True)
 
     class Meta:
         model = IntercityTariff
         fields = "__all__"
         depth = 3
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        response = {
+            "routes": sorted(
+                [
+                    *data["cities"],
+                    *data["global_addresses"],
+                    *data["hubs"]
+                ],
+                key=lambda x: x.get("id"),
+                reverse=True
+            )
+        }
+        return response
 
 
 class TariffSerializer(serializers.ModelSerializer):

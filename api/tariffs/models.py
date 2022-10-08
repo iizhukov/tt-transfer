@@ -323,7 +323,7 @@ class GlobalAddressToPrice(AbstractLocationToPrice):
         return f"{self.pk}: {self.global_address}"
 
 
-class HubToPriceModel(AbstractLocationToPrice):
+class HubsToPriceModel(AbstractLocationToPrice):
     hubs = models.ForeignKey(
         Hub, models.CASCADE, verbose_name=_('В хаб')
     )
@@ -344,7 +344,7 @@ class IntercityTariff(models.Model):
         blank=True
     )
     hubs = models.ManyToManyField(
-        HubToPriceModel, verbose_name=_('В хабы'),
+        HubsToPriceModel, verbose_name=_('В хабы'),
         blank=True
     )
 
