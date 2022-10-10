@@ -307,7 +307,8 @@ class AddLocationToTariff(APIView):
             )
 
         city_to_price = CityToPrice.objects.create(
-            city=city
+            city=city,
+            converse=request.data.get("converse", False)
         )
 
         tariff.intercity_tariff.cities.add(city_to_price)

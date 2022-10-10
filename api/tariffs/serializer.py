@@ -150,6 +150,24 @@ class IntercityTariffSerializer(serializers.ModelSerializer):
         model = IntercityTariff
         fields = "__all__"
         depth = 3
+        
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["cities"] = sorted(
+            response["cities"],
+            key=lambda x: x["id"]
+        )
+        
+        response["global_addresses"] = sorted(
+            response["global_addresses"],
+            key=lambda x: x["id"]
+        )
+        
+        response["hubs"] = sorted(
+            response["hubs"],
+            key=lambda x: x["id"]
+        )
+        return response
 
     # def to_representation(self, instance):
     #     data = super().to_representation(instance)

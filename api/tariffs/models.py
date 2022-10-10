@@ -281,6 +281,7 @@ class AbstractLocationToPrice(models.Model):
             self._set_prices()
             
         if prices:
+            print(*prices)
             self.prices.add(*prices)
 
         return self
@@ -549,6 +550,7 @@ def func(sender, instance, **kwargs):
         ):
             new_city_to_price: CityToPrice = CityToPrice(
                 city=tariff_city,
+                converse=True
             )
 
             new_city_to_price.save(prices=city_to_price.prices.all())
