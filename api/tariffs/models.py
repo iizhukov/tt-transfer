@@ -1,5 +1,7 @@
 from typing import List
 from django.db import models
+from django.db.models import Q
+from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.db.models.signals import post_save, m2m_changed
@@ -506,6 +508,12 @@ class Tariff(models.Model):
 
     def _set_intercity_tariff(self):
         self.intercity_tariff = self.intercity_tariff or IntercityTariff.objects.create()
+    
+    @staticmethod
+    def search_by_string(data: str):
+        return Tariff.objects.filter(
+            Q(title__icontains=data) | Q(comments__icontains=data)
+        ).distinct()
 
 
 @receiver(m2m_changed, sender=IntercityTariff.cities.through)

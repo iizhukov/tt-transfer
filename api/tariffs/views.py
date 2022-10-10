@@ -29,6 +29,7 @@ from api.address.serializers import (
 from api.smartFilter.filters import Filter
 from api.excel import TariffToExcel
 
+
 SERVICES = [
     *DEFAULT_SERVICES_LIST,
     *DEFAULT_SERVICES_ONLY_DRIVERS_LIST
@@ -564,3 +565,26 @@ class ExportTariffView(APIView):
             )
             response['filename'] = filename
             return response
+
+
+class TariffSearchView(APIView):
+    class_serializer = SimpleTariffSerializer
+
+    def get(self, request: Request):
+        search = request.query_params.get("search")
+        
+        if not search:
+            return Response(
+                [],
+                status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = self.class_serializer(
+            Tariff.search_by_string(search.strip().lower()),
+            many=True
+        )
+        
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
+        )

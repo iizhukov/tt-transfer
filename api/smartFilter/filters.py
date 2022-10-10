@@ -1,4 +1,5 @@
-from django.db.models import Model
+from django.db.models import Model, Q
+from django.db.models.query import QuerySet
 from typing import List
 from django.shortcuts import get_object_or_404, get_list_or_404
 from fuzzywuzzy import fuzz
@@ -21,6 +22,8 @@ class Filter:
 
         if not fields:
             return records
+        
+        print(fields)
 
         if "region" in fields:
             records = Filter._search_city(
@@ -65,9 +68,7 @@ class Filter:
         return answer
 
     @staticmethod
-    def _search_city(records: List[Model], region: str, city: str) -> list:
-        answer = []
-
+    def _search_city(records: QuerySet, region: str, city: str) -> list:
         if city:
             city = get_object_or_404(
                 City,
@@ -75,15 +76,16 @@ class Filter:
                 city=city
             )
             return records.filter(
-                city=city
-            )
+                Q(city=city) | Q(intercity_tariff__cities__city=city)
+            ).distinct()
 
         cities = get_list_or_404(
             City,
             region=region
         )
+
         return records.filter(
-            city__in=cities
+            Q(city__in=cities) | Q(intercity_tariff__cities__city__in=city)
         )
 
     @staticmethod
