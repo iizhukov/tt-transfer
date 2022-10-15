@@ -18,6 +18,10 @@ ZONE_COLORS = (
 )
 
 
+class CityZoneIntracityModel(models.Model):
+    ...
+
+
 class City(models.Model):
     country = models.CharField(
         _('Страна'), max_length=128,
