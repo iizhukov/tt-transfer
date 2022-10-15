@@ -13,15 +13,16 @@
 <body>
 <div id="map"></div>
 <script>
+
     function init () {
         let lat = "{{ lat|safe }}", lon = "{{ lon|safe }}";
-        let center_lat = +"{{ center_lat }}".replace(",", ".");
-        let center_lon = +"{{ center_lon }}".replace(",", ".");
 
         lat = lat.replace("['", "").replace("']", "").split("', '").map(parseFloat)
         lon = lon.replace("['", "").replace("']", "").split("', '").map(parseFloat)
 
-    
+        // alert(`(${lat1}, ${lon1}) (${lat2}, ${lon1})`)
+        // alert("{{ lat }}")
+
         var multiRoute = new ymaps.multiRouter.MultiRoute({
             referencePoints: [
                 [lat[0], lon[0]],
@@ -35,8 +36,11 @@
             boundsAutoApply: true
         });
 
+        let city_lat = +"{{ city.center.latitude }}".replace(",", ".");
+        let city_lon = +"{{ city.center.longitude }}".replace(",", ".");
+
         var map = new ymaps.Map("map", {
-            center: [center_lat, center_lon],
+            center: [city_lat, city_lon],
             zoom: 12,
             controls: [
                 "zoomControl"
@@ -45,7 +49,46 @@
             searchControlProvider: 'yandex#search'
         });
 
+        fetch(
+            `http://localhost:8000/api/address/zones/?region={{ city.region }}&city={{ city.city }}`
+        ).then((response) => {
+            return response.json()
+        }).then((zones) => {
+            console.log(zones);
 
+            zones.forEach(element => {
+                let color = "";
+
+                switch (element.color) {
+                    case "green":
+                        color = "#8DC73F";
+                        break;
+                    case "blue":
+                        color = "#337AB7";
+                        break;
+                    case "red":
+                        color = "#DB5454";
+                        break;
+                    case "yellow":
+                        color = "#EAE509";
+                        break;
+                }
+
+                var zone = new ymaps.Polygon(
+                    element.coordinates,
+                    {
+                        hintContent: `${element.color} zone`
+                    },
+                    {
+                        fillOpacity: 0.5,
+                        fillColor: color,
+                        strokeWidth: 3
+                    }
+                );
+
+                map.geoObjects.add(zone);
+            });
+        })
         map.behaviors.disable('scrollZoom');
 
         var referencePoints = multiRoute.model.getReferencePoints();
@@ -60,6 +103,7 @@
     }
 
     ymaps.ready(init);
+
 </script>
 </body>
 </html>

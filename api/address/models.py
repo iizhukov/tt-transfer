@@ -1,9 +1,11 @@
+from tabnanny import verbose
 from typing import List
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
-from django.db.models.constraints import UniqueConstraint
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from slugify import slugify
+from shapely import geometry
 
 from api.cars.models import CAR_CLASSES
 from api.request import GetCoordsByAddress
@@ -33,6 +35,10 @@ class City(models.Model):
         "Coordinate", models.CASCADE,
         null=True, blank=True
     )
+    zone = models.ManyToManyField(
+        "Coordinate", verbose_name=_('координаты'),
+        blank=True, related_name="zone"
+    )
 
     objects = models.Manager()
 
@@ -45,8 +51,8 @@ class City(models.Model):
         return f"{self.country}, {self.region}, {self.city}"
 
     def save(self, *args, **kwargs):
-        self.center = self._get_center_from_request()
-        print("save")
+        if not self.center:
+            self.center = self._get_center_from_request()
 
         if "(" in self.city:
             self.city = self.city.split("(")[0].rstrip()
@@ -68,7 +74,21 @@ class City(models.Model):
 
     def get_center_as_string(self):
         return f"{self.center.latitude}, {self.center.longitude}"
+    
+    def zone_as_list(self):
+        return self.zone.values_list("latitude", "longitude")
+    
+    def coords_in_zone(self, coords):
+        coords_point = geometry.Point(
+            coords.latitude,
+            coords.longitude
+        )
 
+        zone_polygon = geometry.Polygon(
+            self.zone_as_list()
+        )
+
+        return zone_polygon.contains(coords_point)
 
 class AbstractAddressModel(models.Model):
     coordinate = models.ForeignKey(
@@ -182,14 +202,6 @@ class GlobalAddress(AbstractAddressModel):
     def __str__(self):
         return str(self.address)
 
-    def save(self, *args, **kwargs):
-        print(type(self.coordinate))
-
-        super().save(*args, **kwargs)
-        
-    def get_coords_as_string(self):
-        return self.coordinate.get_string()
-
 
 class Coordinate(models.Model):
     latitude = models.FloatField(
@@ -293,3 +305,28 @@ class HubZone(models.Model):
             coords.append([coord.latitude, coord.longitude])
 
         return coords
+
+
+class CitySearchSelect:
+    regions = set(City.objects.values_list('region', flat=True))
+    cities = {
+        region: set(City.objects.filter(
+            region=region
+        ).values_list("city", flat=True))
+        for region in regions
+    }
+
+    @staticmethod
+    def update():
+        CitySearchSelect.regions = set(City.objects.values_list('region', flat=True))
+        CitySearchSelect.cities = {
+            region: set(City.objects.filter(
+                region=region
+            ).values_list("city", flat=True))
+            for region in CitySearchSelect.regions
+        }
+
+
+@receiver([post_save, post_delete], sender=City)
+def new_city_reciver(sender, instance, **kwargs):
+    CitySearchSelect.update()

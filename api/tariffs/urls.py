@@ -12,7 +12,8 @@ urlpatterns = [
 
      path('export-tariffs/', views.ExportTariffView.as_view(), name="export_tariffs"),
      path('set-last-update/<int:tariff_id>/', views.SetLastUpdateTariff.as_view(), name="set_last_update"),
-
+     
+     # Intercity
      path('tariff/<int:tariff_id>/intercity/city/', views.AddLocationToTariff.as_view(location="city"),
           name="add_city_to_tariff"),
      path('tariff/<int:tariff_id>/intercity/global-address/',
@@ -27,5 +28,5 @@ urlpatterns = [
      path('tariff/<int:tariff_id>/intercity/hub/<int:location_id>/', views.AddLocationToTariff.as_view(location="hub"),
           name="add_hub_to_tariff"),
 
-    path("tariff-search", views.TariffSearchView.as_view(), name="tariff_search")
+    path("tariff-search", views.TariffSearchView.as_view(), name="tariff_search"),
 ]

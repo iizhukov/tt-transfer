@@ -47,6 +47,7 @@
 /api/profile/__pycache__/
 /api/smartFilter/__pycache__/
 /api/tariffs/__pycache__/
+/api/calculator/__pycache__/
 
 #api migrations
 # api/activityFeed/migrations/*
@@ -68,6 +69,7 @@ api/orders/migrations/__pycache__
 api/profile/migrations/__pycache__
 api/smartFilter/migrations/__pycache__
 api/tariffs/migrations/__pycache__
+api/calculator/migrations/__pycache__
 
 #except
 !api/activityFeed/migrations/__init__.py
@@ -80,6 +82,7 @@ api/tariffs/migrations/__pycache__
 !api/profile/migrations/__init__.py
 !api/smartFilter/migrations/__init__.py
 !api/tariffs/migrations/__init__.py
+!api/calculator/migrations/__init__.py
 
 #virtualenv
 /env
@@ -90,12 +93,15 @@ api/tariffs/migrations/__pycache__
 
 /media/avatars/*
 /media/documents/*
+/media/excel/*
 /media/news/*
 /media/news/files/*
 /media/news/images/*
 
 !/media/avatars/
 !/media/documents/
+!/media/excel/
 !/media/news/files/
 !/media/news/images/
+
 !/media/avatars/default_avatar.png

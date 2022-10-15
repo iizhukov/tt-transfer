@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'api.profile',
     'api.smartFilter',
     'api.tariffs',
+    'api.calculator',
 ]
 
 MIDDLEWARE = [
@@ -63,9 +64,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    
     'api.middlewares.HaveRefreshTokenMiddleware',
     'api.middlewares.HaveTokenToMediaMiddleware',
+    'api.middlewares.RouteExceptionHendlerMiddleware',
 ]
 
 ROOT_URLCONF = 'tt_transfer.urls'

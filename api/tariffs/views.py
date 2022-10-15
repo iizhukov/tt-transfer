@@ -224,10 +224,12 @@ class PriceToCarClassView(APIView):
         prices: List[Dict[str, str]] = request.data.getlist("prices")
 
         for price in prices:
+            price_ = PriceToCarClass.objects.filter(
+                pk=price.get("id")
+            ).first()
+            print(price_, price)
             serializer = self.serializer_class(
-                instance=PriceToCarClass.objects.filter(
-                    pk=price.get("id")
-                ).first(),
+                instance=price_,
                 data=price
             )
             if serializer.is_valid():

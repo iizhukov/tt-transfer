@@ -1,13 +1,13 @@
 from typing import List
 from django.db import models
 from django.db.models import Q
-from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
+from shapely.geometry import Point, Polygon
 
-from api.address.models import CityZone, City, HubZone, Hub, GlobalAddress
+from api.address.models import City, HubZone, Hub, GlobalAddress, Coordinate
 from api.cars.models import CAR_CLASSES
 from api.profile.models import Company
 from api.exceptions import TariffNotSpecifiedException
@@ -220,34 +220,23 @@ class HubToPrice(models.Model):
                 )
             )
 
+    def get_zone_by_coords(self, coords: Coordinate) -> AdditionalHubZoneToPrice:
+        coords_point = Point(
+            coords.latitude,
+            coords.longitude
+        )
+        
+        zones = self.additional_hubzone_prices.all()
 
-class IntracityTariff(models.Model):
-    hub_to_prices: models.ManyToManyField = models.ManyToManyField(
-        HubToPrice, verbose_name=_('Цены к зонам')
-    )
+        for addtional_hubzone in zones:
+            zone_polygon = Polygon(
+                addtional_hubzone.zone.get_coordinates_as_list()
+            )
 
-    objects = models.Manager()
-
-    class Meta:
-        db_table = "intracity_tariff"
-        verbose_name = "Внутригородской тариф"
-        verbose_name_plural = "Внутригородские тарифы"
-
-    def __str__(self) -> str:
-        return f"{self.id}"
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        return self
-
-    def delete(self, *args, **kwargs):
-        for htp in self.hub_to_prices.all():
-            self.hub_to_prices.remove(htp)
-
-        self.save()
-
-        return super().delete(*args, **kwargs)
+            if zone_polygon.contains(coords_point):
+                return addtional_hubzone
+        
+        return None
 
 
 class AbstractLocationToPrice(models.Model):
@@ -338,6 +327,56 @@ class HubsToPriceModel(AbstractLocationToPrice):
         db_table = "hub_to_price_intercity"
         verbose_name = "Хаб к ценам"
         verbose_name_plural = "Хабы к ценам"
+        
+
+def default_price_to_car_class():
+    return [
+        PriceToCarClass.objects.create(
+            car_class=car_class[0],
+            customer_price=0,
+            driver_price=0
+        )
+        for car_class in CAR_CLASSES
+    ]
+
+
+class IntracityTariff(models.Model):
+    prices = models.ManyToManyField(
+        PriceToCarClass, verbose_name=_('Цены к классу авто'),
+        default=set_default_car_classes_price
+    )
+    hub_to_prices: models.ManyToManyField = models.ManyToManyField(
+        HubToPrice, verbose_name=_('Цены к зонам')
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        db_table = "intracity_tariff"
+        verbose_name = "Внутригородской тариф"
+        verbose_name_plural = "Внутригородские тарифы"
+
+    def __str__(self) -> str:
+        return f"{self.pk}"
+
+    def save(self, *args, **kwargs):        
+        super().save(*args, **kwargs)
+        
+        if not self.prices.all():
+            self._set_prices()
+
+        return self
+
+    def delete(self, *args, **kwargs):
+        for htp in self.hub_to_prices.all():
+            self.hub_to_prices.remove(htp)
+
+        self.save()
+
+        return super().delete(*args, **kwargs)
+    
+    def _set_prices(self):
+        self.prices.add(*set_default_car_classes_price())
 
 
 class IntercityTariff(models.Model):

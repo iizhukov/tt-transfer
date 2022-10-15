@@ -45,6 +45,8 @@ class DistanceAndDuration:
             points.insert(1, *additional_races)
 
         # print(points)
+        
+        print(points)
 
         DistanceAndDuration.payload["point"] = points
 

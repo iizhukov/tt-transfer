@@ -9,6 +9,15 @@ class CitySerializer(serializers.ModelSerializer):
         fields = "__all__"
         depth = 1
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        zone = response["zone"]
+        response["zone"] = [
+            [coordinates.get("latitude"), coordinates.get("longitude")]
+            for coordinates in zone
+        ]
+        return response
+
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:

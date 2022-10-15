@@ -10,6 +10,7 @@ urlpatterns = [
 
     # City
     path('city/', views.CityView.as_view(), name="city"),
+    path('add-city-zone/', views.AddCityZoneView.as_view(), name="city_zone"),
     path('city-zones/', views.ZonesView.as_view(), name="zones"),
     path('city-zones/<int:id>', views.EditZoneView.as_view(), name="edit_zone"),
     path('get-city-zone-by-coords/', views.GetZoneByCoordsView.as_view(), name="get_zone_by_address"),

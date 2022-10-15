@@ -27,11 +27,30 @@ def zones(request):
             "title": request.GET.getlist("title")
         }
     )
+    
+    
+@xframe_options_exempt
+@permission_classes((AllowAny, ))
+def route(request):
+    center_lat, center_lon = request.GET.getlist("center")
+    
+    context = {
+        "lat": request.GET.getlist("lat"),
+        "lon": request.GET.getlist("lon"),
+        "center_lat": center_lat,
+        "center_lon": center_lon
+    }
+
+    return render(
+        request,
+        "route.html",
+        context=context
+    )
 
 
 @xframe_options_exempt
 @permission_classes((AllowAny, ))
-def route(request):
+def route_old(request):
     context = {
         "lat": request.GET.getlist("lat"),
         "lon": request.GET.getlist("lon"),

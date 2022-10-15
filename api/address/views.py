@@ -12,7 +12,7 @@ from fuzzywuzzy import fuzz
 from .models import (
     Address, City, CityZone,
     Coordinate, Hub, HubZone,
-    GlobalAddress
+    GlobalAddress, CitySearchSelect
 )
 from .serializers import (
     CitySerializer, AddressSerializer,
@@ -23,14 +23,6 @@ from .serializers import (
 )
 from api.tariffs.models import Tariff, AdditionalHubZoneToPrice
 from api.request import DistanceAndDuration
-
-REGIONS = set(City.objects.values_list('region', flat=True))
-CITIES = {
-    region: set(City.objects.filter(
-        region=region
-    ).values_list("city", flat=True))
-    for region in REGIONS
-}
 
 
 class CityView(APIView):
@@ -72,6 +64,38 @@ class CityView(APIView):
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
+        )
+        
+        
+class AddCityZoneView(APIView):
+    serializer_class = CitySerializer
+
+    def post(self, request: Request):
+        city = get_object_or_404(
+            City,
+            region=request.data.get("region"),
+            city=request.data.get("city")
+        )
+
+        coordinates = request.data.get("coordinates")[0]
+        
+        city.zone.clear()
+
+        for latitude, longitude in coordinates:
+            coords, _ = Coordinate.objects.get_or_create(
+                latitude=latitude,
+                longitude=longitude
+            )
+
+            city.zone.add(coords)
+        
+        serializer = self.serializer_class(
+            city
+        )
+
+        return Response(
+            serializer.data,
+            status.HTTP_200_OK
         )
 
 
@@ -665,7 +689,7 @@ class FilterRegionsView(APIView):
                 status.HTTP_200_OK
             )
 
-        for region in REGIONS:
+        for region in CitySearchSelect.cities:
             coincidence = fuzz.ratio(search.lower(), region.lower())
             response.append((region, coincidence))
 
@@ -701,7 +725,7 @@ class FilterCitiesView(APIView):
                 status.HTTP_200_OK
             )
 
-        if region not in REGIONS:
+        if region not in CitySearchSelect.regions:
             return Response(
                 {
                     "detail": "Регион не найден"
@@ -709,7 +733,7 @@ class FilterCitiesView(APIView):
                 status.HTTP_400_BAD_REQUEST
             )
 
-        for city in CITIES.get(region):
+        for city in CitySearchSelect.cities.get(region):
             coincidence = fuzz.ratio(search.lower(), city.lower())
             response.append((city, coincidence))
 
