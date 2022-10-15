@@ -10,14 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='intracitytariff',
-            name='city_zone',
-        ),
-        migrations.RemoveField(
-            model_name='intracitytariff',
-            name='city_price',
-        ),
         migrations.AddField(
             model_name='intracitytariff',
             name='city_price',
