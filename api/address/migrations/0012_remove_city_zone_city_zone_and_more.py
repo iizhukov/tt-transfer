@@ -6,20 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('address', '0011_remove_cityzoneintracitymodel_color'),
+        ('address', '0008_alter_globaladdress_address'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='city',
-            name='zone',
-        ),
         migrations.AddField(
             model_name='city',
             name='zone',
             field=models.ManyToManyField(blank=True, related_name='zone', to='address.coordinate', verbose_name='координаты'),
-        ),
-        migrations.DeleteModel(
-            name='CityZoneIntracityModel',
         ),
     ]
