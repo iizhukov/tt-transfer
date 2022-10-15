@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('address', '0009_cityzoneintracitymodel'),
+        ('address', '0008_alter_globaladdress_address'),
         ('tariffs', '0014_rename_hubs_hubstopricemodel_hub_and_more'),
     ]
 
