@@ -32,6 +32,20 @@ class Route:
         if not self.status.is_success:
             raise RouteException(self.status.detail)
 
+    def __add__(self, other):
+        self.is_valid(raise_exception=True)
+        other.is_valide(raise_exception=True)
+
+        new_route_data = {}
+        
+        for key in self.data.keys():
+            new_route_data[key] = self.data.get(key, 0) + other.data.get(key, 0)
+        
+        return Route(
+            self.status,
+            new_route_data
+        )
+
 
 class Point:
     def __init__(self, lat: float, lon: float) -> None:

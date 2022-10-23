@@ -18,10 +18,6 @@ ZONE_COLORS = (
 )
 
 
-class CityZoneIntracityModel(models.Model):
-    ...
-
-
 class City(models.Model):
     country = models.CharField(
         _('Страна'), max_length=128,
@@ -123,6 +119,14 @@ class Address(AbstractAddressModel):
         _('Номер дома'), max_length=12,
         null=True, blank=True
     )
+    address = models.CharField(
+        _('Сырые данные'), max_length=256,
+        null=True, blank=True
+    )
+    address_lower = models.CharField(
+        _('Сырые данные lower'), max_length=256,
+        null=True, blank=True
+    )
 
     class Meta:
         db_table = "address"
@@ -134,6 +138,8 @@ class Address(AbstractAddressModel):
 
     def save(self, *args, **kwargs):
         self.coordinate = self._get_coords_from_request()
+        self.address = self.model_as_raw()
+        self.address_lower = self.address.lower()
 
         return super().save(*args, **kwargs)
 
@@ -151,7 +157,7 @@ class Address(AbstractAddressModel):
         return None
 
     def model_as_raw(self, region=True):
-        return f"{self.city}, {self.street}, {self.number}"
+        return f"{self.city.region}, {self.city.city}, {self.street}, {self.number}"
 
 
 class Hub(AbstractAddressModel):
@@ -162,6 +168,10 @@ class Hub(AbstractAddressModel):
     title = models.CharField(
         _('Название'), max_length=256,
         unique=True
+    )
+    title_lower = models.CharField(
+        _('Название lower'), max_length=256,
+        null=True, blank=True
     )
     slug = models.SlugField(
         _('Слаг'), default="",
@@ -181,6 +191,7 @@ class Hub(AbstractAddressModel):
 
     def save(self, *args, **kwargs):
         self.slug = self.create_slug()
+        self.title_lower = self.title.lower()
 
         super().save(*args, **kwargs)
 
@@ -197,6 +208,10 @@ class GlobalAddress(AbstractAddressModel):
     address = models.CharField(
         _('адрес'), max_length=256, unique=True
     )
+    address_lower = models.CharField(
+        _('Адрес lower'), max_length=256,
+        null=True, blank=True
+    )
 
     class Meta:
         db_table = "address_globaladdress"
@@ -205,6 +220,11 @@ class GlobalAddress(AbstractAddressModel):
 
     def __str__(self):
         return str(self.address)
+    
+    def save(self, *args, **kwargs):
+        self.address_lower = self.address.lower()
+
+        super().save(*args, **kwargs)
 
 
 class Coordinate(models.Model):

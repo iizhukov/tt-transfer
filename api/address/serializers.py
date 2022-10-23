@@ -11,11 +11,12 @@ class CitySerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        zone = response["zone"]
-        response["zone"] = [
-            [coordinates.get("latitude"), coordinates.get("longitude")]
-            for coordinates in zone
-        ]
+        if "zone" in response:
+            zone = response["zone"]
+            response["zone"] = [
+                [coordinates.get("latitude"), coordinates.get("longitude")]
+                for coordinates in zone
+            ]
         return response
 
 

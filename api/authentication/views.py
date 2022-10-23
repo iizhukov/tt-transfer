@@ -166,7 +166,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                 value=response.data["refresh"],
-                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                max_age=settings.SIMPLE_JWT["MAX_AGE"],
+                # expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                 secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
             )
@@ -196,7 +197,8 @@ class CookieTokenRefreshView(TokenRefreshView):
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                 value=response.data["refresh"],
-                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                max_age=settings.SIMPLE_JWT["MAX_AGE"],
+                # expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                 secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                 httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                 samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],

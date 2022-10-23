@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 
-from .controllers import URLMapController, CostCalculationController
+from .controllers import (
+    URLMapController, CostCalculationController,
+    LocationSearchController
+)
 from .route import Route, Point
 from api.permissions import IsManagerOrAdminUser
 from api.address.models import City, Hub, Coordinate
@@ -36,5 +39,50 @@ class TestView(APIView):
 
         return Response(
             controller.data,
+            status.HTTP_200_OK
+        )
+
+
+class CalculatorView(APIView):
+    def get(self, request: Request):
+        points = request.query_params.getlist("points")
+        car_class = request.query_params.get("car_class")
+
+        if len(points) < 2:
+            return Response(
+                {
+                    "detail": "Введите минимум два адреса"
+                },
+                status.HTTP_400_BAD_REQUEST
+            )
+
+        points = [
+            LocationSearchController.parse_point(point)
+            for point in points
+        ]
+        
+        controller = CostCalculationController.count_price(points, car_class)
+        
+        return Response(
+            controller.data,
+            status.HTTP_200_OK
+        )
+
+
+class CalculatorSearchView(APIView):
+    def get(self, request: Request):
+        search = request.query_params.get("search")
+        limit = int(request.query_params.get("limit", 5))
+        
+        response_data = LocationSearchController.search(search)
+        
+        if len(response_data) < limit:
+            response_data.extend(LocationSearchController.address_search(
+                search,
+                limit - len(response_data)
+            ))
+        
+        return Response(
+            response_data[:limit],
             status.HTTP_200_OK
         )

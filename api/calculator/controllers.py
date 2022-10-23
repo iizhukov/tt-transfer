@@ -1,10 +1,11 @@
 from typing import List, Tuple
 from urllib.parse import urlencode
+from fuzzywuzzy import fuzz
 
 from .route import Route, RouteStatuses, Point
-from api.address.models import City, Hub, GlobalAddress, Coordinate
+from api.address.models import City, Hub, GlobalAddress, Coordinate, Address
 from api.tariffs.models import Tariff, HubToPrice, HubsToPriceModel, AbstractLocationToPrice
-from api.request import DistanceAndDuration, GetCoordsByAddress
+from api.request import DistanceAndDuration, GetCoordsByAddress, DadataAddressComplete
 
 
 class URLMapController:
@@ -36,7 +37,126 @@ class URLMapController:
         return lats, lons
 
 
+class LocationSearchController:
+    @staticmethod
+    def search(search: str):
+        search_lower = f'%{"%".join(search.lower().replace(",", " ").split())}%'
+        response = []
+
+        # hubs = list(Hub.objects.filter(title_lower__contains=search_lower).values_list("title", flat=True))
+        # global_addresses = list(GlobalAddress.objects.filter(address_lower__contains=search_lower).values_list("address", flat=True))
+        # addresses = list(Address.objects.filter(address_lower__contains=search_lower).values_list("address", flat=True))
+
+        hubs: List[Hub] = list(Hub.objects.raw(
+        """
+            SELECT * FROM address_hub
+            WHERE title_lower ILIKE %s
+        """, (search_lower, ), 
+        ))
+        global_addresses: List[GlobalAddress] = list(GlobalAddress.objects.raw(
+        """
+            SELECT * FROM address_globaladdress
+            WHERE address_lower ILIKE %s
+        """, (search_lower, ),
+        ))
+        addresses: List[Address] = list(Address.objects.raw(
+        """
+            SELECT * FROM address
+            WHERE address_lower ILIKE %s
+        """, (search_lower, ),
+        ))
+        
+        response = [
+            *map(lambda x: x.title, hubs),
+            *map(lambda x: x.address, global_addresses),
+            *map(lambda x: x.address, addresses),
+        ]
+        
+        # hubs: List[str] = Hub.objects.all().values_list('title', flat=True)
+        # global_addresses: List[str] = GlobalAddress.objects.all().values_list('address', flat=True)
+        # addresses: List[str] = Address.objects.all().values_list('address', flat=True)
+        
+        # print(addresses)
+        
+        # lower_search = search.lower()
+        
+        # for hub in hubs:
+        #     coincidence = fuzz.ratio(hub.lower(), lower_search)
+        #     response.append((coincidence, hub))
+            
+        # for global_address in global_addresses:
+        #     coincidence = fuzz.ratio(global_address.lower(), lower_search)
+        #     response.append((coincidence, global_address))
+            
+        # for address in addresses:
+        #     coincidence = fuzz.ratio(address.lower(), lower_search)
+        #     response.append((coincidence, address.lower()))
+        
+        # response.sort(reverse=True)
+        
+        return response
+    
+    @staticmethod
+    def address_search(search: str, limit: int):
+        return DadataAddressComplete.search(search, limit)
+    
+    @staticmethod
+    def parse_point(point: str):
+        hub = Hub.objects.filter(title=point).first()
+        
+        if hub:
+            return hub
+        
+        global_address = GlobalAddress.objects.filter(address=point).first()
+        
+        if global_address:
+            return global_address
+
+        address = Address.objects.filter(address=point).first()
+        
+        if address:
+            return address
+        
+        return DadataAddressComplete.get(point)
+
+
 class CostCalculationController:
+    @staticmethod
+    def count_price(points: list, car_class: str):
+        first = points[0]
+        
+        routes = []
+        print(points)
+        
+        for second in points[1:]:
+            if type(first) in (dict, Address) and type(second) not in (dict, Address):
+                if type(first) is dict:
+                    city = City.objects.get(
+                        city=first.get("city"),
+                        region=first.get("region")
+                    )
+                elif type(second) is Address:
+                    city = second.city
+
+                if type(second) is Hub:
+                    routes.append(
+                        CostCalculationController.intercity__hub__basic(
+                            city,
+                            second,
+                            car_class
+                        )
+                    )
+                elif type(second) is GlobalAddress:
+                    routes.append(
+                        CostCalculationController.intercity__global_address__basic(
+                            city,
+                            second,
+                            car_class
+                        )
+                    )
+        
+        return routes[0]
+
     @staticmethod
     def intercity__hub__basic(city: City, hub: Hub, car_class: str):
         tariff: Tariff
@@ -158,9 +278,9 @@ class CostCalculationController:
                 driver_price = intracity.prices.get(car_class=car_class).driver_price \
                     + zone.prices.get(car_class=car_class).driver_price
                 
-                url = URLMapController.get_route_url([
-                    Point.coordinate_to_point(hub.coordinate), Point.coordinate_to_point(coordinates)
-                ])
+                # url = URLMapController.get_route_url([
+                #     Point.coordinate_to_point(hub.coordinate), Point.coordinate_to_point(coordinates)
+                # ])
                 
                 return Route(
                     RouteStatuses.OK,
@@ -170,7 +290,7 @@ class CostCalculationController:
                         "minutes_duration": minutes,
                         "customer_price": customer_price,
                         "driver_price": driver_price,
-                        "url": url
+                        # "url": url
                     }
                 )
             
@@ -202,8 +322,8 @@ class CostCalculationController:
                 customer_price = prices.get(car_class=car_class).customer_price
                 driver_price = prices.get(car_class=car_class).driver_price
                 
-                point1, point2 = Point.coordinate_to_point(coords1), Point.coordinate_to_point(coords2)
-                url = URLMapController.get_route_url([point1, point2])
+                # point1, point2 = Point.coordinate_to_point(coords1), Point.coordinate_to_point(coords2)
+                # url = URLMapController.get_route_url([point1, point2])
                 
                 return Route(
                     RouteStatuses.OK,
@@ -213,7 +333,7 @@ class CostCalculationController:
                         "minutes_duration": minutes,
                         "customer_price": customer_price,
                         "driver_price": driver_price,
-                        "url": url
+                        # "url": url
                     }
                 )
 
