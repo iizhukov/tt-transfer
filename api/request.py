@@ -18,7 +18,11 @@ class GetCoordsByAddress:
         response = requests.get(
             GetCoordsByAddress.URL,
             params=GetCoordsByAddress.payload
-        ).json()
+        )
+        
+        print(response.raw)
+        
+        response = response.json()
 
         if response:
             print(response[0]["lat"], response[0]["lon"])
